@@ -1,0 +1,9 @@
+djangorestframework
+django-cors-headers
+networkx
+graphviz
+pandas
+matplotlib
+openpyxl
+natsort
+pydot

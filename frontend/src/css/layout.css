@@ -1,0 +1,119 @@
+.padded {
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+}
+
+.padded-sm {
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+}
+
+.border {
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  border: 1px solid black;
+}
+
+.background {
+  background: rgba(93, 203, 211, 0.1);
+  padding: 30px;
+}
+
+.text {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mappings {
+  margin: 5px 10px;
+  padding-top: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-left: 5x;
+}
+
+.params {
+  margin: 20px;
+}
+
+.custom-slider {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.switch {
+  border-radius: rem;
+  border: 1px solid black;
+}
+
+.margin-switches {
+  margin: 10px 10px;
+  padding-top: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  padding-left: 5x;
+}
+
+.hr {
+  margin: 20px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.rowC {
+  display: flex;
+  flex-direction: row;
+}
+.right-align {
+  text-align: right;
+}
+
+.left-panel {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
+.left-panel-25{
+  display: inline-block;
+  width: 20%;
+  vertical-align: top;
+}
+
+.right-panel-75 {
+  text-align: right; 
+  display: inline-block;
+  width: 80%;
+  vertical-align: top;
+}
+
+.right-panel {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
+.custom-btn {
+  margin:1px;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn-check:active + .btn-primary, .btn-check:checked + .btn-primary, .btn-primary.active, .btn-primary:active, .show > .btn-primary.dropdown-toggle {
+  color: #fff !important;
+  background-color: #9bbdde !important;
+  border-color: #9ba9b6 !important;
+}
+
+/* .right {
+  float:right
+}  */
