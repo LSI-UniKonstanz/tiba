@@ -1,0 +1,10 @@
+notes
+token
+backend/public/interactions/
+backend/public/transitions/
+backend/public/plots/
+backend/backend/settings.py
+backend/backend/__pycache__/
+backend/functions/__pycache__/
+backend/functions/migrations/__pycache__/
+
