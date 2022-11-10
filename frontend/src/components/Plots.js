@@ -1,14 +1,8 @@
-import React, { useEffect } from "react";
+import { React } from "react";
 import { Table } from "react-bootstrap";
 import { saveAs } from "file-saver";
 
 export default function Plot(props) {
-
-  //initialise 
-  useEffect(
-    () => props.passValues({ behavior: props.options[0] }),
-    [props.options]
-  );
 
   // request new calculation if user clicks on apply changes
   const applyChanges = () => {
@@ -63,31 +57,10 @@ export default function Plot(props) {
 
   return (
     <div className="padded text">
-      <h3>Behaviour graph</h3>
+      <h3>Behavior graph</h3>
       <div className="border background">
-        <p>The behaviour graph displays the temporal occurrences of behavioural events. 
-          It uses values from the column <i>Time</i> for the x-values and the cumulative count of behaviours shown up to that time separately for each individual for the y-values. 
-        Behaviours and individuals may be deselected.</p>
-
+        <p>The behavior graph displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.</p>
         <br></br>
-        {/*         <label htmlFor="behavior">
-          Choose <b>behavior</b> to display
-        </label>
-        <select
-          className="params"
-          name="behavior"
-          id="behavior"
-          onChange={change}
-        >
-          {props.options.map((item) => {
-            return (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            );
-          })}
-        </select>
-        <p> </p> */}
         <Table striped bordered hover>
           <thead>
             <tr>

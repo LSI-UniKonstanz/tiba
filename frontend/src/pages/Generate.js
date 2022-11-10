@@ -362,9 +362,13 @@ export default class Generate extends Component {
           passName={this.updateUploadName}
         />
         {this.state.upload_response && (
-          <div className="padded">
-            <h4>Unfortunately we cannot handle the provided data:</h4>
-            <h5>{this.state.upload_response}</h5>
+          <div className="padded text">
+            <h3>Unfortunately we cannot handle the provided data for the following reasons:</h3>
+            <div className="border background">
+              {this.state.upload_response.split("\n").map((err) => (
+                <h4 className="red">{err}</h4>
+              ))}
+            </div>
           </div>
         )}
         <div ref={this.infoRef}>

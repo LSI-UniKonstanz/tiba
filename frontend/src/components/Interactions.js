@@ -85,12 +85,10 @@ export default function Interactions(props) {
 
   return (
     <div className="padded text">
-      <h3>Interaction graph</h3>
+      <h3>Interaction network</h3>
       <div className="border background">
 
-        <p>The interaction graph displays the number and direction of interactions between individuals. 
-          It is a directed weighted graph where edges are drawn from A to B if A is the subject of a behaviour and B is the recipient, i.e. the corresponding value in the optional column <i>Modifier 1</i>. 
-        The number of interactions determines the weight of the edge. Individuals may be deselected and a threshold for edges to be displayed may be set.</p>
+        <p>The interaction network displays the number and direction of interactions between individuals. It is a directed weighted network where edges are drawn from individual A to individual B if A is the subject of a behavior and B is the recipient (i.e. the corresponding value in the optional column <i>Modifier</i>). The number of interactions determines the weight of an edge. Individuals may be deselected and a weight threshold for edges to be displayed may be set.</p>
         <br></br>
 
         <span><b>Remove edges below:</b>&nbsp;&nbsp;&nbsp;</span>

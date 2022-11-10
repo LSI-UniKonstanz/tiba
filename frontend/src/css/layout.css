@@ -114,6 +114,6 @@ a {
   border-color: #9ba9b6 !important;
 }
 
-/* .right {
-  float:right
-}  */
+.red {
+  color: red;
+}

@@ -95,11 +95,9 @@ export default function Transitions(props) {
   return (
     <div className="padded">
       <div className="text">
-        <h3>Behaviour transition graph</h3>
+        <h3>Behavior transition network</h3>
         <div className="border background">
-          <p>The behaviour transition graph displays temporal sequences of behaviour. 
-            It is a directed, weighted graph where the nodes represent either behaviours or behavioural categories and edges represent the transition from one behaviour to another. Either the number of transitions or the transition probabilities, i.e. the probability with which a certain behaviour follows another behaviour, may be used as edge weighting. Behaviours, behavioural categories or individuals may be deselected and thereby excluded from the calculation and visualisation. Nodes may be parameterised by mapping the total number of behaviours, the average or total time of behaviours to node size, node colour density or a label inside the node. The width of drawn edges may either be fixed or dependent on the weighting, also a threshold for edges to be displayed may be set. 
-            Edge width, node size and node saturation may be normalised either linearly or logarithmically. Two colour options are available: either each node and its outgoing edges have distinctive colours or a colour is set and the nodes differentiate in the colour saturation dependent on the mapping.</p>
+          <p>The behavior transition network displays temporal sequences of behavioral events. It is a directed, weighted network where the nodes represent either behaviors or behavioral categories and edges represent the transition from one behavior to another. Either the number of transitions or the transitional frequencies, i.e. the relative frequency with which a certain behavior follows another behavior, may be used as edge weighting. Individual behaviors, behavioral categories or individuals may be deselected and thereby excluded from the calculation and visualization. Node appearance may be altered by mapping the total number of behaviors, the average or total time of behaviors to node size, node color saturation or a label inside the node. The width of drawn edges may either be fixed or dependent on the weights, also a threshold for edges to be displayed may be set. Edge width, node size and node saturation may be normalized either in a linear or logarithmic fashion. Two color options are available: either each node and its outgoing edges have distinctive colors or a color is set and the nodes differentiate in the color saturation dependent on the mapping.</p>
           
           <br></br>
           <hr className="hr"></hr>
@@ -313,7 +311,7 @@ export default function Transitions(props) {
 
             <div className="mappings">
               {!props.custom_edge_thickness && (<div>
-                <span><b>Edge thickness factor:</b>&nbsp;&nbsp;&nbsp;</span>
+                <span><b>Edge width factor:</b>&nbsp;&nbsp;&nbsp;</span>
                 <input
                   className="form-range"
                   name="colored_edge_thickness"

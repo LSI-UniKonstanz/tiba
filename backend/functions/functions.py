@@ -58,30 +58,68 @@ def try_upload(raw_data):
     # remove meta information before column headers
     try:
         header_row_index = get_row_index(
-            df, ['Time', 'time', 'Subject', 'subject', 'Status', 'Behavior', 'Behaviour'])[0]
+            df, ['Time', 'time', 'Subject', 'subject', 'Status', 'Behavior'])[0]
         df = df.iloc[header_row_index:]
         df.columns = df.iloc[0]
         df = df.iloc[1:]
     except:
         pass
 
-    # make column headers lowercase and substitute whitespace
-    df.columns = [x.lower() for x in df.columns]
-    df.columns = df.columns.str.replace(' ', '_')
+    try:
+        # make column headers lowercase and substitute whitespace
+        df.columns = [x.lower() for x in df.columns]
+        df.columns = df.columns.str.replace(' ', '_')
+
+        # rename modifier column if it is named 'modifiers' 
+        if 'modifiers' in df.columns and 'modifier_1' not in df.columns:
+            df.rename(columns = {'modifiers':'modifier_1'}, inplace = True)
+        if 'modifier' in df.columns and 'modifier_1' not in df.columns:
+            df.rename(columns = {'modifier':'modifier_1'}, inplace = True)
+
+        # if user has BORIS exported data as 'aggregated events' change syntax
+        if 'start_(s)' in df.columns and 'time' not in df.columns:
+            #split into behavior starts and stops and rename accordingly
+            df_starts = df.copy(deep=True)
+            df_starts.rename(columns = {'start_(s)':'time'}, inplace = True)
+            df_starts["status"] = "START"
+            #drop unused rows
+            df_starts.drop(['stop_(s)', 'duration_(s)'], axis=1, inplace=True)
+
+            df_stops = df.copy(deep=True)
+            df_stops.rename(columns = {'stop_(s)':'time'}, inplace = True)
+            df_stops["status"] = "STOP"
+            #drop unused rows
+            df_stops.drop(['start_(s)', 'duration_(s)'], axis=1, inplace=True)
+
+            df = df_starts.append(df_stops)
+            df.time = df.time.astype(float)
+            df = df.sort_values(by = 'time')
+            df.reset_index(drop=True, inplace=True)
+    except:
+        return ('could not parse column headers', False)
+
 
     response = ''
     success = True
-
-    # return error message and instructions if time, subject, behavior or status are not present
-    if 'time' not in df.columns:
-        response += 'Required column \"Time\" is missing\n'
-        success = False
-    if 'subject' not in df.columns:
-        response += 'Required column \"Subject\" is missing\n'
-        success = False
-    if 'behavior' not in df.columns:
-        response += 'Required column \"Behavior\" is missing\n'
-        success = False
+    try:
+        # return error message and instructions if time, subject, behavior or status are not present
+        if 'time' not in df.columns:
+            response += 'Required column \"Time\" is missing\n'
+            success = False
+        if 'subject' not in df.columns:
+            response += 'Required column \"Subject\" is missing\n'
+            success = False
+        if 'behavior' not in df.columns:
+            response += 'Required column \"Behavior\" is missing\n'
+            success = False
+        if df.time.isnull().values.any():
+            response += 'Column "time" must not have any empty cells\n'
+            success = False
+        if df.behavior.isnull().values.any():
+            response += 'Column "behavior" must not have any empty cells\n'
+            success = False
+    except: 
+        return ('Could not parse dataset', False)
 
     return (response, success)
 
@@ -116,13 +154,39 @@ def handle_upload(raw_data):
     df.columns = [x.lower() for x in df.columns]
     df.columns = df.columns.str.replace(' ', '_')
 
-    # convert time to float if excel gives string objects
-    df.time = df.time.astype(float)
+    # rename modifier column if it is named 'modifiers' 
+    if 'modifiers' in df.columns and 'modifier_1' not in df.columns:
+        df.rename(columns = {'modifiers':'modifier_1'}, inplace = True)
+    if 'modifier' in df.columns and 'modifier_1' not in df.columns:
+        df.rename(columns = {'modifier':'modifier_1'}, inplace = True)
+
+    # if user has BORIS exported data as 'aggregated events' change syntax
+    if 'start_(s)' in df.columns and 'time' not in df.columns:
+        #split into behavior starts and stops and rename accordingly
+        df_starts = df.copy(deep=True)
+        df_starts.rename(columns = {'start_(s)':'time'}, inplace = True)
+        df_starts["status"] = "START"
+        #drop unused rows
+        df_starts.drop(['stop_(s)', 'duration_(s)'], axis=1, inplace=True)
+
+        df_stops = df.copy(deep=True)
+        df_stops.rename(columns = {'stop_(s)':'time'}, inplace = True)
+        df_stops["status"] = "STOP"
+        #drop unused rows
+        df_stops.drop(['start_(s)', 'duration_(s)'], axis=1, inplace=True)
+
+        df = df_starts.append(df_stops)
+        df.time = df.time.astype(float)
+        df = df.sort_values(by = 'time')
+        df.reset_index(drop=True, inplace=True)
 
     # if dataset contains only two individuals and modifier_1 not included, add corresponding modifier_1
     # if 'modifier_1' not in df.columns and len(df.subject.unique()) == 2:
     #    df['modifier_1'] = df.subject.unique()[0]
     #    df['modifier_1'] = np.where(df['subject'] == df.subject.unique()[0], df.subject.unique()[1], df['modifier_1'])
+
+    # convert time to float if excel gives string objects
+    df.time = df.time.astype(float)
 
     # add missing columns
     if 'modifier_1' not in df.columns:
@@ -267,8 +331,9 @@ def dataplot(df, behavior, id_list, bhvr_list):
     :param show_avg: display average line
     :param show_grid: display grid
     """
+
     # Only use Starting behaviors to not double count
-    df = df.drop(df[df.status == 'STOP'].index)
+    df = df[df.status != 'STOP']
 
     # Hacky solution: if frontend has not yet initialized the id_list, then use all IDs
     if 'dummy' in id_list:
@@ -289,6 +354,7 @@ def dataplot(df, behavior, id_list, bhvr_list):
     # loop over all fish_ids and plot their amount of selected interactions
     for fish in id_list:
         fish_df = df[df.subject == fish]
+
         # Remove rows with unselected behaviors
         for x in remove_bhvr_list:
             fish_df = fish_df.drop(fish_df[fish_df.behavior == x].index)
@@ -297,17 +363,6 @@ def dataplot(df, behavior, id_list, bhvr_list):
             highest_plot = len(fish_df)+1
         sum_of_rows = range(1, len(fish_df)+1)
         plt.plot(fish_df.time, sum_of_rows, label=fish)
-
-        #derivative
-        #y_diff = np.diff(sum_of_rows) / np.diff(fish_df.time)
-        #x_diff = (np.array(fish_df.time)[:-1] + np.array(fish_df.time)[1:]) / 2
-
-        #print((x_diff))
-        #print((y_diff))
-        #plt.plot(x_diff, y_diff, label=fish)
-
-        
-
 
     plt.gca().set_prop_cycle(None)
     """ # loop over all fish ids and make a dotted line to the end if the fish is not doing any new
@@ -361,12 +416,6 @@ def dataplot(df, behavior, id_list, bhvr_list):
     localhost = 'http://127.0.0.1:8000/'
     folder = 'public/'
     path = 'plots/plot_' + str(rand) + '.gv.svg'
-    
-
-    """     figure = plt.gcf()  # get current figure
-
-
-    figure.set_size_inches(8, 6) """
 
     plt.savefig(folder + path, format='svg', bbox_inches='tight')
     #url = localhost + path
@@ -476,6 +525,7 @@ def transition_network(
         if (normalized):
             sum_of_successors = action_frame.records.sum()
             action_frame['normalized'] = action_frame.records.div(sum_of_successors).round(2)
+            #action_frame['ln_normalized'] = (np.log(action_frame.records) / np.log(sum_of_successors)).round(2)
         edges_df = edges_df.append(action_frame)
 
     # erase edges below min_count
@@ -614,8 +664,11 @@ def transition_network(
     # create label and weight for edges
     if (normalized):
         edge_attributes_label = dict(zip(edges_df.tuples, edges_df.normalized))
-        edges_df.normalized = edges_df.normalized * multiplication_factor
-        edge_attributes_weight = dict(zip(edges_df.tuples, edges_df.normalized))
+        edge_attributes_weight = dict(zip(edges_df.tuples, edges_df.normalized * multiplication_factor))
+        #if (logarithmic_normalization):
+        #    edge_attributes_weight = dict(zip(edges_df.tuples, edges_df.normalized * multiplication_factor))
+
+
     else:
         edge_attributes_label = dict(zip(edges_df.tuples, edges_df.records))
         # normalize logarithmic

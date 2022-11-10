@@ -16,6 +16,7 @@ export default function DisplayInfos(props) {
         {/*display name of uploaded file*/}
         <h5>{props.upload_name}</h5>
         <br></br>
+        {props.upload_name && (<div>
         <Table striped bordered>
           <thead>
             <tr>
@@ -39,7 +40,6 @@ export default function DisplayInfos(props) {
               <td><b>Behavior</b></td>
               <td>
                 {props.behaviors.map((id) => (
-                  // don't use a comma after the last item
                   props.behaviors.at(-1) !== id
                     ? <span key={id}>{id + ", "}</span>
                     : <span key={id}>{id}</span>
@@ -50,17 +50,16 @@ export default function DisplayInfos(props) {
               <td><b>Behavioral Category</b></td>
               <td>
                 {props.categories.map((id) => (
-                  // don't use a comma after the last item
                   props.categories.at(-1) !== id
                     ? <span key={id}>{id + ", "}</span>
                     : <span key={id}>{id}</span>
                 ))}
               </td>
-            </tr>            <tr>
+            </tr>
+            <tr>
               <td><b>Modifier 1</b></td>
               <td>
                 {props.modifier_1s.map((id) => (
-                  // don't use a comma after the last item
                   props.modifier_1s.at(-1) !== id
                     ? <span key={id}>{id + ", "}</span>
                     : <span key={id}>{id}</span>
@@ -69,7 +68,9 @@ export default function DisplayInfos(props) {
             </tr>
           </tbody>
         </Table>
+        </div>)}
       </div>
+
     </div>
   );
 }
