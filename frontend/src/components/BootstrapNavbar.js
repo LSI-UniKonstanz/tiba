@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navbar, Nav } from "react-bootstrap";
 import Generate from "../pages/Generate";
 import About from "../pages/About";
+import Privacy from "../pages/Privacy";
 import LoadingIndicator from "./LoadingIndicator";
 
 class BootstrapNavbar extends React.Component {
@@ -17,14 +18,11 @@ class BootstrapNavbar extends React.Component {
               </div>
             </Navbar.Brand>
             <Nav>
-              {/*  <div className="padded-sm">
-                  <Nav.Link href="/">Visualize</Nav.Link>
-                </div>
-                <div className="padded-sm">
-                  <Nav.Link href="/compare">Compare</Nav.Link>
-                </div> */}
               <div className="padded-sm">
                 <Nav.Link href="/about">About</Nav.Link>
+              </div>
+              <div className="padded-sm">
+                <Nav.Link href="/privacy">Privacy policy</Nav.Link>
               </div>
             </Nav>
             <Nav className="ms-auto">
@@ -36,8 +34,8 @@ class BootstrapNavbar extends React.Component {
           <br />
           <Routes>
             <Route path="/" element={<Generate />} />
-            {/* <Route path="/compare" element={<Compare />} /> */}
             <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
         </Router>
       </div>

@@ -17,57 +17,50 @@ export default function DisplayInfos(props) {
         <h5>{props.upload_name}</h5>
         <br></br>
         {props.upload_name && (<div>
-        <Table striped bordered>
-          <thead>
-            <tr>
-              <th>Column</th>
-              <th>Unique Values</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Subject</b></td>
-              <td>
-                {props.ids.map((id) => (
-                  // don't use a comma after the last item
-                  props.ids.at(-1) !== id
-                    ? <span key={id}>{id + ", "}</span>
-                    : <span key={id}>{id}</span>
-                ))}
-              </td>
-            </tr>
-            <tr>
-              <td><b>Behavior</b></td>
-              <td>
-                {props.behaviors.map((id) => (
-                  props.behaviors.at(-1) !== id
-                    ? <span key={id}>{id + ", "}</span>
-                    : <span key={id}>{id}</span>
-                ))}
-              </td>
-            </tr>
-            <tr>
-              <td><b>Behavioral Category</b></td>
-              <td>
-                {props.categories.map((id) => (
-                  props.categories.at(-1) !== id
-                    ? <span key={id}>{id + ", "}</span>
-                    : <span key={id}>{id}</span>
-                ))}
-              </td>
-            </tr>
-            <tr>
-              <td><b>Modifier 1</b></td>
-              <td>
-                {props.modifier_1s.map((id) => (
-                  props.modifier_1s.at(-1) !== id
-                    ? <span key={id}>{id + ", "}</span>
-                    : <span key={id}>{id}</span>
-                ))}
-              </td>
-            </tr>
-          </tbody>
-        </Table>
+          <Table striped bordered>
+            <thead>
+              <tr>
+                <th>Column</th>
+                <th>Unique Values</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Subject</b></td>
+                <td>
+                  {props.ids.map((id) => (
+                    <span key={id}>{id + ", "}</span>
+                  ))}
+                </td>
+              </tr>
+              <tr>
+                <td><b>Behavior</b></td>
+                <td>
+                  {props.behaviors.map((id) => (
+                    <span key={id}>{id + ", "}</span>
+
+                  ))}
+                </td>
+              </tr>
+              <tr>
+                <td><b>Behavioral Category</b></td>
+                <td>
+                  {props.categories.map((id) => (
+                    <span key={id}>{id + ", "}</span>
+                  ))}
+                </td>
+              </tr>
+              <tr>
+                <td><b>Modifier 1</b></td>
+                <td>
+                  {props.modifier_1s.map((id) => (
+                    <span key={id}>{id + ", "}</span>
+
+                  ))}
+                </td>
+              </tr>
+            </tbody>
+          </Table>
         </div>)}
       </div>
 
