@@ -24,7 +24,8 @@ class InfoView(APIView):
         ids = get_fish_ids(data)
         modifier_1s = get_unique_modifier1s(data)
         behaviors = natsort.natsorted(data.behavior.unique().tolist())
-        categories = natsort.natsorted(data.behavioral_category.unique().tolist())
+        categories = natsort.natsorted(
+            data.behavioral_category.unique().tolist())
         return_data = {
             "headers": headers,
             "ids": ids,
@@ -45,7 +46,7 @@ class InteractionView(APIView):
         id_list = json.loads(self.request.POST.get('id_list', None))
         mod1_list = json.loads(self.request.POST.get('mod1_list', None))
         min_edge_count = json.loads(self.request.data['min_edge_count'])
-        
+
         return_data = {"graph": interaction_network(
             data, id_list, mod1_list, min_edge_count)}
         return Response(status=200, data=return_data)
@@ -69,26 +70,59 @@ class TransitionView(APIView):
         data = handle_upload(self.request.data['upload'])
         if data is False:
             return Response(status=204)
-        option = self.request.data['option']
+
+        # init empty vars
+        min_edge_count = 0
+        with_status = False
+        normalized = False
+        colored = False
+        colored_edge_thickness = 2
+        color_hue = 150
+        node_color_map = "total_time"
+        node_size_map = "total_time"
+        node_label_map = "total_time"
+        id_list = ['dummy']
+        bhvr_list = ['dummy']
+        custom_edge_thickness = False
+        logarithmic_normalization = False
+
+        #set customizations if present
+        if ("option" in self.request.data):
+            option = self.request.data['option']
         if (option == 'false'):
             option = 'behavior'
         else:
             option = 'behavioral_category'
-        min_edge_count = json.loads(self.request.data['min_edge_count'])
-        with_status = json.loads(self.request.data['with_status'])
-        normalized = json.loads(self.request.data['normalized'])
-        logarithmic_normalization = json.loads(self.request.data['logarithmic_normalization'])
-        colored = json.loads(self.request.data['colored'])
-        colored_edge_thickness = json.loads(
-            self.request.data['colored_edge_thickness'])
-        color_hue = json.loads(self.request.data['color_hue'])
-        node_color_map = self.request.data['node_color_map']
-        node_size_map = self.request.data['node_size_map']
-        node_label_map = self.request.data['node_label_map']
+        if ("min_edge_count" in self.request.data):
+            min_edge_count = json.loads(self.request.data['min_edge_count'])
+        if ("with_status" in self.request.data):
+            with_status = json.loads(self.request.data['with_status'])
+        if ("normalized" in self.request.data):
+            normalized = json.loads(self.request.data['normalized'])
+        if ("logarithmic_normalization" in self.request.data):
+            logarithmic_normalization = json.loads(
+                self.request.data['logarithmic_normalization'])
+        if ("colored" in self.request.data):
+            colored = json.loads(self.request.data['colored'])
+        if ("colored_edge_thickness" in self.request.data):
+            colored_edge_thickness = json.loads(
+                self.request.data['colored_edge_thickness'])
+        if ("color_hue" in self.request.data):
+            color_hue = json.loads(self.request.data['color_hue'])
+        if ("node_color_map" in self.request.data):
+            node_color_map = self.request.data['node_color_map']
+        if ("node_size_map" in self.request.data):
+            node_size_map = self.request.data['node_size_map']
+        if ("node_label_map" in self.request.data):
+            node_label_map = self.request.data['node_label_map']
         # Load json stringified arrays
-        id_list = json.loads(self.request.POST.get('id_list', None))
-        bhvr_list = json.loads(self.request.POST.get('bhvr_list', None))
-        custom_edge_thickness = json.loads(self.request.data['custom_edge_thickness'])
+        if ("id_list" in self.request.data):
+            id_list = json.loads(self.request.POST.get('id_list', None))
+        if ("bhvr_list" in self.request.data):
+            bhvr_list = json.loads(self.request.POST.get('bhvr_list', None))
+        if ("custom_edge_thickness" in self.request.data):
+            custom_edge_thickness = json.loads(
+                self.request.data['custom_edge_thickness'])
 
         return_data = {
             "graph": transition_network(
