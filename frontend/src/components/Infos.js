@@ -55,7 +55,6 @@ export default function DisplayInfos(props) {
                 <td>
                   {props.modifier_1s.map((id) => (
                     <span key={id}>{id + ", "}</span>
-
                   ))}
                 </td>
               </tr>
