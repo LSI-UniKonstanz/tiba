@@ -5,8 +5,8 @@ import numpy as np
 import graphviz
 import networkx as nx
 import pandas as pd
+import uuid
 import math
-import random
 import warnings
 import natsort
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -279,9 +279,6 @@ def interaction_network(df, id_list, mod1_list, threshold=1,):
     # edge weight
     nx.set_edge_attributes(G, edge_attributes_weight, name='penwidth')
 
-    # make random file extension
-    rand = random.randint(0, 255)
-
     # graphviz
     G_dot_string = to_pydot(G).to_string()
     G_dot = graphviz.Source(G_dot_string)
@@ -291,7 +288,7 @@ def interaction_network(df, id_list, mod1_list, threshold=1,):
     #localhost = 'https://tiba.inf.uni-konstanz.de/'
     localhost = 'http://127.0.0.1:8000/'
     folder = 'public/'
-    path = 'interactions/interactions' + str(rand)
+    path = 'interactions/interactions-' + uuid.uuid4().hex
     G_dot.render(folder + path + '.gv', view=False)
 
     # save graph as .gml
@@ -409,13 +406,11 @@ def dataplot(df, behavior, id_list, bhvr_list):
     plt.yticks(yticks)
     plt.grid(linestyle='-', linewidth=0.2)
 
-    # make random file extension
-    rand = random.randint(0, 255)
     # storage vars
     #localhost = 'https://tiba.inf.uni-konstanz.de/'
     localhost = 'http://127.0.0.1:8000/'
     folder = 'public/'
-    path = 'plots/plot_' + str(rand) + '.gv.svg'
+    path = 'plots/plot-' + uuid.uuid4().hex + '.svg'
 
     plt.savefig(folder + path, format='svg', bbox_inches='tight')
     #url = localhost + path
@@ -424,7 +419,6 @@ def dataplot(df, behavior, id_list, bhvr_list):
     plt.close('all')
 
     return url
-
 
 def transition_network(
         df,
@@ -757,13 +751,11 @@ def transition_network(
     G_dot = graphviz.Source(G_dot_string)
     G_dot.format = 'svg'
 
-    # make random file extension
-    rand = random.randint(0, 255)
     # storage vars
     #localhost = 'https://tiba.inf.uni-konstanz.de/'
     localhost = 'http://127.0.0.1:8000/'
     folder = 'public/'
-    path = 'transitions/transitions' + str(rand)
+    path = 'transitions/transitions-' + uuid.uuid4().hex
     G_dot.render(folder + path + '.gv', view=False)
 
     # save graph as .gml
