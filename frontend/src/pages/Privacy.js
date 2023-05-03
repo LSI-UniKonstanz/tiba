@@ -10,7 +10,7 @@ function Privacy() {
         <div className="border background">
           <h4>I. Name and address of the data protection officer</h4>
           <p>
-            The university's data protection officer is:<br></br> <br></br>N.N. <br></br>
+            The university's data protection officer is:<br></br> <br></br>DDSK GmbH <br></br> Irina Weiß <br></br>
             Email: <a href="mailto:datenschutzbeauftragter@uni-konstanz.de">datenschutzbeauftragter@uni-konstanz.de</a>
             <br></br>
             Website: <a href="https://www.uni-konstanz.de/en/data-protection/">Data protection officer</a>
