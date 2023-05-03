@@ -7,3 +7,6 @@ matplotlib
 openpyxl
 natsort
 pydot
+netrd
+scipy
+scikit-learn-extra

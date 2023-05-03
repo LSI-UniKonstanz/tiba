@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navbar, Nav } from "react-bootstrap";
 import Generate from "../pages/Generate";
 import About from "../pages/About";
-import Privacy from "../pages/Compare";
+import Privacy from "../pages/Privacy";
 import LoadingIndicator from "./LoadingIndicator";
 import Compare from "../pages/Compare";
 
