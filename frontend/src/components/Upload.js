@@ -15,14 +15,16 @@ export default function Upload(props) {
 * **Optional columns**: *Modifier 1*, *Behavioral category*, *Status*
 `;
 
-  //pass input to parent component
+  //pass input files to parent component (multiple files are passed after each other)
   const handleFileChange = (e) => {
-    props.passUpload({
-      [e.target.name]: e.target.files[0],
-    });
-    props.passName({
-      [upload_name]: e.target.files[0].name,
-    });
+    for (let i = 0; i < e.target.files.length; i++) {
+      props.passUpload({
+        [e.target.name]: e.target.files[i],
+      });
+      props.passName({
+        [upload_name]: e.target.files[i].name,
+      });
+    };
   };
 
   //return the title followed by description and file input widget
@@ -35,6 +37,7 @@ export default function Upload(props) {
         <Form.Group controlId="formFile" className="mb-3">
           <Form.Control type="file" name="upload"
             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            multiple
             onChange={handleFileChange}
           />
         </Form.Group>
