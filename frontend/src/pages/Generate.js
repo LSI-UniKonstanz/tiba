@@ -357,10 +357,7 @@ export default class Generate extends Component {
           passUpload={this.updateUpload}
           passName={this.updateUploadName}
         />
-        <ExampleData
-          passExample={this.updateExampleData}
-          passName={this.updateUploadName}
-        />
+        {/* If upload not successful, show http error response */}
         {this.state.upload_response && (
           <div className="padded text">
             <h3>Unfortunately we cannot handle the provided data for the following reasons:</h3>
@@ -371,6 +368,10 @@ export default class Generate extends Component {
             </div>
           </div>
         )}
+        <ExampleData
+          passExample={this.updateExampleData}
+          passName={this.updateUploadName}
+        />
         <div ref={this.infoRef}>
           {this.state.upload_successful && (
             <Infos

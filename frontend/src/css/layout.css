@@ -21,12 +21,12 @@
 }
 
 .background {
-  background: rgba(93, 203, 211, 0.1);
+  background: rgba(111, 176, 191, 0.1);
   padding: 30px;
 }
 
 .text {
-  max-width: 1200px;
+  max-width: 1250px;
   margin: 0 auto;
 }
 

@@ -1,0 +1,28 @@
+.sidenav {
+    width: 350px;
+    position: fixed;
+    z-index: 1;
+    top: 70px;
+    left: 10px;
+    background: #eee;
+    overflow-x: hidden;
+    padding: 8px 0;
+}
+
+
+
+.main {
+    margin-left: 360px;
+    /* Same width as the sidebar + left position in px */
+    padding: 0px 10px;
+}
+
+@media screen and (max-height: 450px) {
+    .sidenav {
+        padding-top: 15px;
+    }
+
+    .sidenav a {
+        font-size: 18px;
+    }
+}

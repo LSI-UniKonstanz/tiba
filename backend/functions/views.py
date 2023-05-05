@@ -84,12 +84,28 @@ class DistanceView(APIView):
         # get pairwise distances
         dists_edge_list = distances(list_A, distance_alg)
 
-        # cluster distances and return image url
-        image_url = mds(dists_edge_list, distance_alg, random_state, n_init, setindices)
-        image2_url = hierarchical_cluster(dists_edge_list, distance_alg, linkage, setindices)
-        image3_url = kmedoids_cluster(dists_edge_list, distance_alg)
+        # Convert the edgelist to a distance matrix
+        dist_matrix, node_dict = edgelist_to_dist_matrix(dists_edge_list)
 
-        return Response(status=200, data={"image_url": image_url, "image2_url": image2_url, "image3_url": image3_url})
+        # cluster distances and return image url
+        image_url, labels = mds(
+            dist_matrix, node_dict, distance_alg, random_state, n_init, setindices
+        )
+        image2_url = hierarchical_cluster(
+            dist_matrix, node_dict, distance_alg, linkage, setindices
+        )
+        # image3_url = kmedoids_cluster(dists_edge_list, distance_alg)
+
+        return Response(
+            status=200,
+            data={
+                "image_url": image_url,
+                "image2_url": image2_url,
+                "dist_matrix": json.dumps(dist_matrix),
+                "node_dict": json.dumps(node_dict),
+                "labels": json.dumps(labels),
+            },
+        )
 
 
 class TransitionView(APIView):
@@ -153,24 +169,27 @@ class TransitionView(APIView):
             custom_edge_thickness = json.loads(
                 self.request.data["custom_edge_thickness"]
             )
+        try:
+            return_data = {
+                "graph": transition_network(
+                    data,
+                    option,
+                    min_edge_count,
+                    with_status,
+                    normalized,
+                    colored,
+                    colored_edge_thickness,
+                    color_hue,
+                    node_color_map,
+                    node_size_map,
+                    node_label_map,
+                    id_list,
+                    bhvr_list,
+                    custom_edge_thickness,
+                    logarithmic_normalization,
+                )
+            }
+        except:
+            return_data = {"graph": ""}
 
-        return_data = {
-            "graph": transition_network(
-                data,
-                option,
-                min_edge_count,
-                with_status,
-                normalized,
-                colored,
-                colored_edge_thickness,
-                color_hue,
-                node_color_map,
-                node_size_map,
-                node_label_map,
-                id_list,
-                bhvr_list,
-                custom_edge_thickness,
-                logarithmic_normalization,
-            )
-        }
         return Response(status=200, data=return_data)

@@ -98,7 +98,7 @@ export default function Transitions(props) {
         <h3>Behavior transition network</h3>
         <div className="border background">
           <p>The behavior transition network displays temporal sequences of behavioral events. It is a directed, weighted network where the nodes represent either behaviors or behavioral categories and edges represent the transition from one behavior to another. Either the number of transitions or the transitional frequencies, i.e. the relative frequency with which a certain behavior follows another behavior, may be used as edge weighting. Individual behaviors, behavioral categories or individuals may be deselected and thereby excluded from the calculation and visualization. Node appearance may be altered by mapping the total number of behaviors, the average or total time of behaviors to node size, node color saturation or a label inside the node. The width of drawn edges may either be fixed or dependent on the weights, also a threshold for edges to be displayed may be set. Edge width, node size and node saturation may be normalized either in a linear or logarithmic fashion. Two color options are available: either each node and its outgoing edges have distinctive colors or a color is set and the nodes differentiate in the color saturation dependent on the mapping.</p>
-          
+
           <br></br>
           <hr className="hr"></hr>
           <div className="left-panel">
@@ -123,7 +123,6 @@ export default function Transitions(props) {
                 }}
               />
             </div>
-
 
             {/*switch for normalized outgoing edges*/}
             <div className="margin-switches">
@@ -204,6 +203,36 @@ export default function Transitions(props) {
                   props.passValues({ transitions_new_config: true, })
                 }}
               />
+            </div>
+            <div className="mappings">
+              <span><b>Remove edges below:</b>&nbsp;&nbsp;&nbsp;</span>
+
+              {props.normalized && (
+                <input
+                  className="form-control"
+                  name="min_edge_count"
+                  id="min_edge"
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  onChange={handleChange}
+                  onWheel={(e) => e.target.blur()}
+                  style={{ width: '200px' }}
+                ></input>
+              )}
+              {!props.normalized && (
+                <input
+                  className="form-control"
+                  name="min_edge_count"
+                  id="min_edge"
+                  type="number"
+                  min="0"
+                  onChange={handleChange}
+                  style={{ width: '200px' }}
+                  onWheel={(e) => e.target.blur()}
+                ></input>
+              )}
             </div>
 
           </div>
@@ -327,36 +356,6 @@ export default function Transitions(props) {
             </div>
 
           </div>
-
-          <div className="mappings">
-            <span><b>Remove edges below:</b>&nbsp;&nbsp;&nbsp;</span>
-
-            {props.normalized && (
-              <input
-                className="form-control"
-                name="min_edge_count"
-                id="min_edge"
-                type="number"
-                min="0"
-                max="1"
-                step="0.01"
-                onChange={handleChange}
-                onWheel={(e) => e.target.blur()}
-              ></input>
-            )}
-            {!props.normalized && (
-              <input
-                className="form-control"
-                name="min_edge_count"
-                id="min_edge"
-                type="number"
-                min="0"
-                onChange={handleChange}
-                onWheel={(e) => e.target.blur()}
-              ></input>
-            )}
-          </div>
-
           <Table striped bordered hover>
             <thead>
               <tr>

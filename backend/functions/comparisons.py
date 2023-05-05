@@ -98,11 +98,7 @@ def edgelist_to_dist_matrix(edge_list):
     return dist_matrix, node_dict
 
 
-def hierarchical_cluster(edgelist, distance_alg, linkage_method="average", setindices=False):
-
-    # Convert the edgelist to a condensed distance matrix
-    dist_matrix, node_dict = edgelist_to_dist_matrix(edgelist)
-
+def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="average", setindices=False):
     # Convert the distance matrix to a condensed distance matrix
     dist_condensed = squareform(dist_matrix)
 
@@ -113,6 +109,7 @@ def hierarchical_cluster(edgelist, distance_alg, linkage_method="average", setin
 
     # get data labels
     labels = [key[0] for key in node_dict.keys()]
+    print(labels)
     
     # give indices to labels dependent on label
     if (setindices):
@@ -127,7 +124,7 @@ def hierarchical_cluster(edgelist, distance_alg, linkage_method="average", setin
             elif string.startswith('O'):
                 labels[i] = f"{string}{id3}"
                 id3 += 1
-
+    print(labels)
     # Plot the dendrogram of the clustering
     plt.title(f"Hierarchical Clustering Dendrogram for {distance_alg}")
     plt.xlabel("Sample Index")
@@ -135,19 +132,19 @@ def hierarchical_cluster(edgelist, distance_alg, linkage_method="average", setin
     dendrogram(linkage(dist_condensed, method=linkage_method), labels=labels, truncate_mode="level")
     
     # save and return image
-    #localhost = "http://127.0.0.1:8000/"
-    localhost = 'https://tiba.inf.uni-konstanz.de/'
+    localhost = "http://127.0.0.1:8000/"
+    #localhost = 'https://tiba.inf.uni-konstanz.de/'
     folder = "public/"
     path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
     plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    # url = localhost + folder + path
-    url = localhost + path
+    url = localhost + folder + path
+    #url = localhost + path
     plt.close("all")
 
     return url
 
 
-def mds(edgelist, distance_alg, random_state=0, n_init=4, setindices=False):
+def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindices=False):
     """
     Uses multidimensional scaling to visualize the distances provided in the edge list
 
@@ -155,9 +152,6 @@ def mds(edgelist, distance_alg, random_state=0, n_init=4, setindices=False):
     :param cluster_alg:
     :return: image url
     """
-
-    # Convert the edgelist to a distance matrix
-    dist_matrix, node_dict = edgelist_to_dist_matrix(edgelist)
 
     # init mds model
     mds_model = manifold.MDS(
@@ -208,14 +202,14 @@ def mds(edgelist, distance_alg, random_state=0, n_init=4, setindices=False):
     plt.title(f"{distance_alg} distances across transition networks")
 
     # save and return image
-    #localhost = "http://127.0.0.1:8000/"
-    localhost = 'https://tiba.inf.uni-konstanz.de/'
+    localhost = "http://127.0.0.1:8000/"
+    #localhost = 'https://tiba.inf.uni-konstanz.de/'
     folder = "public/"
     path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
     plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    #url = localhost + folder + path
-    url = localhost + path
+    url = localhost + folder + path
+    #url = localhost + path
 
     plt.close("all")
 
-    return url
+    return (url,labels)
