@@ -109,24 +109,23 @@ def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="a
 
     # get data labels
     labels = [key[0] for key in node_dict.keys()]
-    print(labels)
     
-    # give indices to labels dependent on label
+    # append label-dependent indices to labels
     if (setindices):
-        id1,id2,id3=1,1,1
-        for i, string in enumerate(labels):
-            if string.startswith('M'):
-                labels[i] = f"{string}{id1}"
-                id1 += 1
-            elif string.startswith('T'):
-                labels[i] = f"{string}{id2}"
-                id2 += 1
-            elif string.startswith('O'):
-                labels[i] = f"{string}{id3}"
-                id3 += 1
-    print(labels)
+        counts = {}
+        result = []
+
+        for val in labels:
+            if val not in counts:
+                counts[val] = 1
+            else:
+                counts[val] += 1
+            result.append(f"{val}{counts[val]}")
+        
+        labels = result
+
     # Plot the dendrogram of the clustering
-    plt.title(f"Hierarchical Clustering Dendrogram for {distance_alg}")
+    plt.title(f"Dendrogram for {distance_alg} distances across transition networks", fontsize=14, pad=20)
     plt.xlabel("Sample Index")
     plt.ylabel("Distance")
     dendrogram(linkage(dist_condensed, method=linkage_method), labels=labels, truncate_mode="level")
@@ -165,41 +164,38 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
     # plt.scatter(mds_coords[:, 0], mds_coords[:, 1])
     labels = [key[0] for key in node_dict.keys()]
 
-    # give indices to labels dependent on label
+    # Create a list of colors corresponding to the labels list. Each unique labels gets a unique color.
+    unique_vals = list(set(labels))
+    colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+    color_dict = {val: colors[i] for i, val in enumerate(unique_vals)}
+    color_list = [color_dict[val] for val in labels]
+
+    # append label-dependent indices to labels
     if (setindices):
-        id1,id2,id3=1,1,1
-        for i, string in enumerate(labels):
-            if string.startswith('M'):
-                labels[i] = f"{string}{id1}"
-                id1 += 1
-            elif string.startswith('T'):
-                labels[i] = f"{string}{id2}"
-                id2 += 1
-            elif string.startswith('O'):
-                labels[i] = f"{string}{id3}"
-                id3 += 1
+        counts = {}
+        result = []
+
+        for val in labels:
+            if val not in counts:
+                counts[val] = 1
+            else:
+                counts[val] += 1
+            result.append(f"{val}{counts[val]}")
         
-    # set colors dependent on label (but not on index)
-    colors = [
-        "red"
-        if l[0] == "M"
-        else "green"
-        if l[0] == "O"
-        else "blue"
-        if l[0] == "T"
-        else "black"
-        if l[0] == "2"
-        else "violet"
-        for l in labels
-    ]
-    plt.scatter(mds_coords[:, 0], mds_coords[:, 1], c=colors, alpha=0.8)
+        labels = result
+
+    plt.scatter(mds_coords[:, 0], mds_coords[:, 1], c=color_list, alpha=0.9)
 
     for label, x, y in zip(labels, mds_coords[:, 0], mds_coords[:, 1]):
         plt.annotate(label, (x, y), xycoords="data")
 
     plt.xlabel("First Dimension")
     plt.ylabel("Second Dimension")
-    plt.title(f"{distance_alg} distances across transition networks")
+    plt.title(f"2D embedding of {distance_alg} distances across transition networks", fontsize=14, pad=20)
+
+    # get the current figure and adjust its size
+    fig = plt.gcf()
+    fig.set_size_inches(fig.get_size_inches() * 1.1) # scale by 20
 
     # save and return image
     localhost = "http://127.0.0.1:8000/"
