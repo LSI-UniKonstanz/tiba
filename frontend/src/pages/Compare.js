@@ -26,8 +26,7 @@ export default class Compare extends Component {
       // settings for distances between transition networks
       configured: true,
       distanceAlg: "PortraitDivergence",
-      setindices: false,
-      setindices_mds: false,
+      setindices: true,
       // mds
       random_state: 0,
       n_init: 4,
@@ -143,7 +142,6 @@ export default class Compare extends Component {
         node_dict: data.node_dict,
         labels: JSON.parse(data.labels),
       }))
-    console.log(this.state.labels);
   };
 
 
@@ -158,7 +156,7 @@ export default class Compare extends Component {
           <div className="padded">
             <h3>Settings</h3>
             <div className="border background ">
-              <span><b>Set graph distance method - </b><a href="https://netrd.readthedocs.io/en/latest/distance.html">docs </a>&nbsp;&nbsp;&nbsp;</span>
+              <span><b>Set graph distance method - </b><a target="_blank" href="https://netrd.readthedocs.io/en/latest/distance.html">docs </a>&nbsp;&nbsp;&nbsp;</span>
               <br></br>
               <select
                 className="form-select"
@@ -193,7 +191,7 @@ export default class Compare extends Component {
               </select>
               <br></br>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="setindices" onChange={(e) => this.setState({ setindices: e.target.checked })}></input>
+                <input class="form-check-input" type="checkbox" value="" id="setindices" checked={this.state.setindices} onChange={(e) => this.setState({ setindices: e.target.checked })}></input>
                 <label class="form-check-label" for="flexCheckDefault">
                   <b>Enumerate</b> the uploaded data
                 </label>
@@ -211,7 +209,11 @@ export default class Compare extends Component {
           <div className="padded text">
             <h3> Description and Usage instructions</h3>
             <div className="border background">
-              <p> This page processes datasets from <a href="https://www.boris.unito.it/">BORIS</a> and is used to compare behavior transition networks. For the purpose of comparison, a standardized transition network is created uniformly for all uploaded datasets. This uses individual behaviors as nodes and the relative frequency of behavior successions as a weighting for directed edges (to the respective consecutive behavior). To visualize a single dataset, please go to the main page.
+              <p> This page processes datasets from <a target="_blank" href="https://www.boris.unito.it/">BORIS</a> and is used to compare behavior transition networks. 
+              For the purpose of comparison, a standardized transition network is created uniformly for all uploaded datasets. 
+              This uses individual behaviors as nodes and the relative frequency of behavior successions as a weighting for directed edges (to the respective consecutive behavior). 
+              The resulting transition networks will be compared with the chosen distance measure. Only the Network Portrait Divergence (default setting) is including the edge weights into the computation. Thus, all the other distance measures only compare the existence of behavioral transitions, not their relative frequency.
+              To visualize a single dataset, please go to the main page.
               </p>
               <br></br>
               <p><b>1.</b> <b>File Upload</b> - use the upload widget multiple times to upload data. The first character is used as index. To remove an uploaded dataset, click on it. </p>
@@ -248,6 +250,9 @@ export default class Compare extends Component {
           {this.state.dist_matrix && <div className="padded text">
             <h3> Resulting distance matrix</h3>
             <div className="border background">
+            <p>Here are the pairwise distances of the transition networks generated on the uploaded datasets. The order of the datasets/labels corresponds to the order in which they were uploaded. The symmetry of the distance matrix, that the upper right half corresponds to the lower left half, comes from the symmetry property of the distances. We want to clarify that the distances are non-metric. This means that the triangle inequality does not hold in general. 
+            </p>
+
               <Table striped bordered>
                 <thead>
                   <tr>
@@ -280,11 +285,10 @@ export default class Compare extends Component {
           {this.state.dist_matrix &&
             <div className="padded text">
               <h3>Multidimensional scaling (MDS)</h3>
-              <div className="border background ">
-                <p>Multidimensional scaling (MDS) seeks a low-dimensional representation of the data in which the distances respect well the distances in the original high-dimensional space. In general, MDS is a technique used for analyzing similarity or dissimilarity data. It attempts to model similarity or dissimilarity data as distances in a geometric space (<a href="https://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling">documentation for scikit-learn MDS </a>).
+              <div className="border background">
+                <p>Multidimensional scaling (MDS) seeks a low-dimensional representation of the data in which the distances respect well the distances in the original high-dimensional space. In general, MDS is a technique used for analyzing similarity or dissimilarity data. It attempts to model similarity or dissimilarity data as distances in a geometric space (<a target="_blank" href="https://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling">docs for multidimensional scaling (sklearn) </a>).
                   <br></br><br></br>As network distances are non-metric, the algorithms will try to preserve the order of the distances, and hence seek for a monotonic relationship between the distances in the embedded space and the similarities/dissimilarities.</p>
-
-                <span><b>Set random state (<a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>):</b>&nbsp;&nbsp;&nbsp;</span>
+                <span><b>Set random state (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>):</b>&nbsp;&nbsp;&nbsp;</span>
                 <input
                   type="number"
                   className="form-control"
@@ -298,8 +302,7 @@ export default class Compare extends Component {
                   onWheel={(e) => e.target.blur()}
                   style={{ width: '150px' }}
                 ></input>
-                <br></br>
-                <span><b>Set n_init(<a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>):</b>&nbsp;&nbsp;&nbsp;</span>
+                <span><b>Set n_init(<a target="blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>):</b>&nbsp;&nbsp;&nbsp;</span>
                 <input
                   type="number"
                   className="form-control"
@@ -327,7 +330,7 @@ export default class Compare extends Component {
               <h3>Hierarchical clustering</h3>
               <div className="border background ">
                 <p> Hierarchical clustering is a general family of clustering algorithms that build nested clusters by merging or splitting them successively. This hierarchy of clusters is represented as a tree (or dendrogram). The root of the tree is the unique cluster that gathers all the samples, the leaves being the clusters with only one sample.
-                  (<a href="https://scikit-learn.org/stable/modules/manifold.html#hierarchical-clustering">documentation for scikit-learn MDS </a>)
+                  (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html">docs for hierarchical clustering (sklearn) </a>)
                 </p>
                 {/* select linkage criterion */}
                 <span><b>Set linkage criterion </b></span>

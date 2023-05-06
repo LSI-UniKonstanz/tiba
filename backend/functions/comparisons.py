@@ -108,7 +108,7 @@ def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="a
     ).fit(dist_matrix)
 
     # get data labels
-    labels = [key[0] for key in node_dict.keys()]
+    labels = [key[0:2] for key in node_dict.keys()]
     
     # append label-dependent indices to labels
     if (setindices):
@@ -123,6 +123,10 @@ def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="a
             result.append(f"{val}{counts[val]}")
         
         labels = result
+
+    # get the current figure and adjust its size
+    fig = plt.gcf()
+    fig.set_size_inches(fig.get_size_inches() * 1.2) # scale by 20
 
     # Plot the dendrogram of the clustering
     plt.title(f"Dendrogram for {distance_alg} distances across transition networks", fontsize=14, pad=20)
@@ -162,7 +166,7 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
     # init mpl figure
     f = plt.figure()
     # plt.scatter(mds_coords[:, 0], mds_coords[:, 1])
-    labels = [key[0] for key in node_dict.keys()]
+    labels = [key[0:2] for key in node_dict.keys()]
 
     # Create a list of colors corresponding to the labels list. Each unique labels gets a unique color.
     unique_vals = list(set(labels))
@@ -195,7 +199,7 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
 
     # get the current figure and adjust its size
     fig = plt.gcf()
-    fig.set_size_inches(fig.get_size_inches() * 1.1) # scale by 20
+    fig.set_size_inches(fig.get_size_inches() * 1.2) # scale by 20
 
     # save and return image
     localhost = "http://127.0.0.1:8000/"

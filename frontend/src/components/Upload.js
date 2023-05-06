@@ -24,7 +24,7 @@ export default function Upload(props) {
       <h3>File Upload</h3>
 
       <div className=" background">
-        <b>No data?</b> Export from <a href="https://www.boris.unito.it/">BORIS</a>
+        <b>No data?</b> Export from <a target="_blank" href="https://www.boris.unito.it/">BORIS</a>
         <ul>
           <li><b>Accepted filetypes</b>: <i>.xlsx</i>, <i>.csv</i>
           </li>

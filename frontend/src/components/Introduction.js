@@ -13,7 +13,7 @@ export default function Introduction() {
     <div className="padded text">
       <h3>Description</h3>
       <div className="border background">
-        <p>This tool models graphs from behavior data that is given as list ordered by time. Such data can be derived from the event-logging software <a href="https://www.boris.unito.it/">BORIS</a>.
+        <p>This tool models graphs from behavior data that is given as list ordered by time. Such data can be derived from the event-logging software <a target="_blank" href="https://www.boris.unito.it/">BORIS</a>.
           Three visualizations are available,depicting the temporal occurrences of behavioral events, the number and direction of interactions between individuals, and the behavioral transitions and their respective transitional frequencies. The options to set node and edge properties and to select behaviors and individuals allow for interactive customization of the output drawings, which can be downloaded afterwards.</p>
 
         <br></br>
