@@ -1,5 +1,9 @@
-# The Interactive Behavior Analyzer (https://tiba.inf.uni-konstanz.de)
+# The Interactive Behavior Analyzer
+
 This tool models graphs from behavior data that is given as list ordered by time. Such data can be derived from the event-logging software BORIS. Three visualizations are available,depicting the temporal occurrences of behavioral events, the number and direction of interactions between individuals, and the behavioral transitions and their respective transitional frequencies. The options to set node and edge properties and to select behaviors and individuals allow for interactive customization of the output drawings, which can be downloaded afterwards.
+
+## Availability
+TIBA is available online at https://tiba.inf.uni-konstanz.de. However, it is also possible to have a local installation (see below).
 
 
 ## Local installation
