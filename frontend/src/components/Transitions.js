@@ -216,6 +216,7 @@ export default function Transitions(props) {
                   min="0"
                   max="1"
                   step="0.01"
+                  placeholder="0"
                   onChange={handleChange}
                   onWheel={(e) => e.target.blur()}
                   style={{ width: '200px' }}
@@ -227,6 +228,7 @@ export default function Transitions(props) {
                   name="min_edge_count"
                   id="min_edge"
                   type="number"
+                  placeholder="0"
                   min="0"
                   onChange={handleChange}
                   style={{ width: '200px' }}

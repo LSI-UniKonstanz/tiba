@@ -32,6 +32,7 @@ export default class Compare extends Component {
       n_init: 4,
       // hierarchical clustering
       linkage: "average",
+      color_threshold: 0.2,
     };
   }
   updateUpload = (obj) => {
@@ -77,6 +78,8 @@ export default class Compare extends Component {
     formData.append("upload", this.state["upload"]);
     formData.append("option", this.state["option"]);
     formData.append("normalized", this.state["normalized"]);
+    formData.append("for_comparison", true);
+
 
     await fetch(url + "api/transitions/", {
       method: "POST",
@@ -129,6 +132,8 @@ export default class Compare extends Component {
     formData.append("random_state", this.state["random_state"]);
     formData.append("n_init", this.state["n_init"]);
     formData.append("linkage", this.state["linkage"]);
+    formData.append("color_threshold", this.state["color_threshold"]);
+
 
     await fetch(url + "api/distances/", {
       method: "POST",
@@ -138,6 +143,9 @@ export default class Compare extends Component {
       .then((data) => this.setState({
         image: data.image_url,
         image2: data.image2_url,
+        image3: data.image3_url,
+        image4: data.image4_url,
+        image5: data.image5_url,
         dist_matrix: JSON.parse(data.dist_matrix),
         node_dict: data.node_dict,
         labels: JSON.parse(data.labels),
@@ -167,9 +175,6 @@ export default class Compare extends Component {
                 <option key="1" value="PortraitDivergence">
                   Network Portrait Divergence
                 </option>
-                <option key="2" value="JaccardDistance">
-                  Jaccard Distance (unweighted)
-                </option>
                 <option key="3" value="DistributionalNBD">
                   DistributionalNBD (unweighted)
                 </option>
@@ -181,9 +186,6 @@ export default class Compare extends Component {
                 </option>
                 <option key="6" value="IpsenMikhailov">
                   IpsenMikhailov (unweighted)
-                </option>
-                <option key="7" value="PolynomialDissimilarity">
-                  PolynomialDissimilarity (unweighted)
                 </option>
                 <option key="8" value="DegreeDivergence">
                   DegreeDivergence (unweighted)
@@ -288,7 +290,7 @@ export default class Compare extends Component {
               <div className="border background">
                 <p>Multidimensional scaling (MDS) seeks a low-dimensional representation of the data in which the distances respect well the distances in the original high-dimensional space. In general, MDS is a technique used for analyzing similarity or dissimilarity data. It attempts to model similarity or dissimilarity data as distances in a geometric space (<a target="_blank" href="https://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling">docs for multidimensional scaling (sklearn) </a>).
                   <br></br><br></br>As network distances are non-metric, the algorithms will try to preserve the order of the distances, and hence seek for a monotonic relationship between the distances in the embedded space and the similarities/dissimilarities.</p>
-                <span><b>Set random state (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>):</b>&nbsp;&nbsp;&nbsp;</span>
+                <span><b>Set random state (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>)</b>: Determines the random number generator used to initialize the centers.&nbsp;&nbsp;&nbsp;</span>
                 <input
                   type="number"
                   className="form-control"
@@ -302,7 +304,7 @@ export default class Compare extends Component {
                   onWheel={(e) => e.target.blur()}
                   style={{ width: '150px' }}
                 ></input>
-                <span><b>Set n_init(<a target="blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>):</b>&nbsp;&nbsp;&nbsp;</span>
+                <span><b>Set n_init(<a target="blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>)</b>: Number of times the SMACOF algorithm will be run with different initializations. The final results will be the best output of the runs, determined by the run with the smallest final stress. &nbsp;&nbsp;&nbsp;</span>
                 <input
                   type="number"
                   className="form-control"
@@ -310,7 +312,7 @@ export default class Compare extends Component {
                   id="random_state"
                   min="4"
                   max="1000"
-                  defaultValue={4}
+                  defaultValue={30}
                   onChange={(e) => this.setState({ n_init: e.target.value })}
                   onWheel={(e) => e.target.blur()}
                   style={{ width: '150px' }}
@@ -324,6 +326,20 @@ export default class Compare extends Component {
               </div>
             </div>
           }
+          {/* 3d graph with edges corresponding to edge weight, only visible when distances are calculated  */}
+          {this.state.dist_matrix &&
+            <div className="padded text">
+              <h3>3D graph prototype</h3>
+              <div className="border background">
+                <p>edge length correspond to inverse edge weigth, networkx spring layout (randomized)</p>
+                <div class="image-container">
+                <img src={this.state.image3} alt="need to load data and get distances first" />
+                  <img  src={this.state.image4} alt="need to load data and get distances first" />
+                  <img  src={this.state.image5} alt="need to load data and get distances first" />
+                </div>
+              </div>
+            </div>
+          }
           {/* Hierarchical clustering output image and params, only visible when distances are calculated  */}
           {this.state.dist_matrix &&
             <div className="padded text">
@@ -332,13 +348,15 @@ export default class Compare extends Component {
                 <p> Hierarchical clustering is a general family of clustering algorithms that build nested clusters by merging or splitting them successively. This hierarchy of clusters is represented as a tree (or dendrogram). The root of the tree is the unique cluster that gathers all the samples, the leaves being the clusters with only one sample.
                   (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html">docs for hierarchical clustering (sklearn) </a>)
                 </p>
+
                 {/* select linkage criterion */}
-                <span><b>Set linkage criterion </b></span>
+                <span><b>Set linkage criterion </b>: Which linkage criterion to use. The linkage criterion determines which distance to use between sets of observation. The algorithm will merge the pairs of cluster that minimize this criterion.</span>
                 <br></br>
                 <select
                   className="form-select"
                   name="linkage"
                   id="linkage"
+                  style={{ width: '200px' }}
                   onChange={(e) => this.setState({ linkage: e.target.value })}
                 >
                   <option key="1" value="average">
@@ -351,6 +369,23 @@ export default class Compare extends Component {
                     single
                   </option>
                 </select>
+
+                {/* choose color threshold */}
+                <span><b>Set color threshold: </b>Colors all the descendent links below a cluster node  <i>k</i> the same color if <i>k</i> is the first node below the cut threshold.</span>
+                <input
+                  className="form-control"
+                  name="color_threshold"
+                  id="color_threshold"
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  placeholder="0.2"
+                  onChange={(e) => this.setState({ color_threshold: e.target.value })}
+                  onWheel={(e) => e.target.blur()}
+                  style={{ width: '200px' }}
+                ></input>
+
                 <br></br>
                 <button type="button" className="btn btn-success" onClick={() => trackPromise(this.getDistances())}>Recalculate</button>
                 <div className="imgbox">

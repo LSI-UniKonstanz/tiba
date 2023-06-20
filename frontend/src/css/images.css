@@ -8,3 +8,15 @@
     max-height: 100vh;
     margin: auto;
 }
+
+.image-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.image-container img {
+    width: 33%;
+    height: auto;
+}
+
+

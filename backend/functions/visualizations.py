@@ -229,6 +229,7 @@ def transition_network(
     bhvr_list,
     custom_edge_thickness,
     logarithmic_normalization,
+    for_comparison
 ):
     """
     The behavior transition network displays temporal sequences of behavioral events.
@@ -361,9 +362,9 @@ def transition_network(
     # erase edges below min_count
     try:
         if normalized and min_count:
-            edges_df = edges_df[edges_df.normalized > float(min_count)]
+            edges_df = edges_df[edges_df.normalized >= float(min_count)]
         elif not normalized and min_count:
-            edges_df = edges_df[edges_df.records > float(min_count)]
+            edges_df = edges_df[edges_df.records >= float(min_count)]
     except:
         pass
 
@@ -537,7 +538,8 @@ def transition_network(
         nx.set_edge_attributes(G, edge_attributes_weight, name="penwidth")
         # print(edge_attributes_weight)
     nx.set_edge_attributes(G, edge_attributes_label, name="label")
-    nx.set_edge_attributes(G, edge_attributes_label, name="weight")
+    if (for_comparison):
+        nx.set_edge_attributes(G, edge_attributes_label, name="weight")
 
     # set node attributes
     nx.set_node_attributes(G, nodes_width, name="width")

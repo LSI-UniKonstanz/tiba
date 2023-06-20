@@ -80,6 +80,7 @@ class DistanceView(APIView):
 
         # read params for hierarchical clustering
         linkage = self.request.data["linkage"]
+        color_threshold = float(self.request.data["color_threshold"])
 
         # get pairwise distances
         dists_edge_list = distances(list_A, distance_alg)
@@ -92,15 +93,20 @@ class DistanceView(APIView):
             dist_matrix, node_dict, distance_alg, random_state, n_init, setindices
         )
         image2_url = hierarchical_cluster(
-            dist_matrix, node_dict, distance_alg, linkage, setindices
+            dist_matrix, node_dict, distance_alg, linkage, setindices, color_threshold
         )
-        # image3_url = kmedoids_cluster(dists_edge_list, distance_alg)
+        image3_url,image4_url,image5_url = create_graph(
+            dist_matrix, node_dict, distance_alg, setindices
+        )
 
         return Response(
             status=200,
             data={
                 "image_url": image_url,
                 "image2_url": image2_url,
+                "image3_url": image3_url,
+                "image4_url": image4_url,
+                "image5_url": image5_url,
                 "dist_matrix": json.dumps(dist_matrix),
                 "node_dict": json.dumps(node_dict),
                 "labels": json.dumps(labels),
@@ -128,6 +134,7 @@ class TransitionView(APIView):
         bhvr_list = ["dummy"]
         custom_edge_thickness = False
         logarithmic_normalization = False
+        for_comparison = False
 
         # set customizations if present
         if "option" in self.request.data:
@@ -142,6 +149,8 @@ class TransitionView(APIView):
             with_status = json.loads(self.request.data["with_status"])
         if "normalized" in self.request.data:
             normalized = json.loads(self.request.data["normalized"])
+        if "for_comparison" in self.request.data:
+            for_comparison = json.loads(self.request.data["for_comparison"])
         if "logarithmic_normalization" in self.request.data:
             logarithmic_normalization = json.loads(
                 self.request.data["logarithmic_normalization"]
@@ -187,6 +196,7 @@ class TransitionView(APIView):
                     bhvr_list,
                     custom_edge_thickness,
                     logarithmic_normalization,
+                    for_comparison
                 )
             }
         except:

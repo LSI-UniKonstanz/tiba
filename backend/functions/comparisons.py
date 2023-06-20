@@ -97,8 +97,100 @@ def edgelist_to_dist_matrix(edge_list):
 
     return dist_matrix, node_dict
 
+def create_graph(dist_matrix, node_dict, distance_alg, setindices):
+    # Convert the distance matrix to a NetworkX graph
+    G = nx.Graph()
+    for i, u in enumerate(node_dict.keys()):
+        for j, v in enumerate(node_dict.keys()):
+            if i != j:
+                G.add_edge(u, v, weight=dist_matrix[i][j])
 
-def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="average", setindices=False):
+    node_labels = {k: k[0:2] for k in node_dict.keys()}
+
+    # Get unique labels
+    unique_labels = list(set(node_labels.values()))
+
+    # Assign colors to labels
+    label_colors = {label: f"C{i}" for i, label in enumerate(unique_labels)}
+
+    # Get color for each node based on its label
+    node_colors = [label_colors[node_labels[node]] for node in G.nodes()]
+
+    # Create a 3D plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Generate node positions using spring layout
+    pos = nx.spring_layout(G, dim=3, weight='weight')
+
+    # Plot the nodes
+    for node, color in zip(G.nodes(), node_colors):
+        x, y, z = pos[node]
+        ax.scatter(x, y, z, color=color)
+        ax.text(x, y, z, node_labels[node], color='k', fontsize=8)
+
+    # Plot the edges with lengths scaled by weights
+    for u, v, w in G.edges.data('weight'):
+        x1, y1, z1 = pos[u]
+        x2, y2, z2 = pos[v]
+        edge_length = 1 / w  # Invert the edge weight
+        ax.plot([x1, x2], [y1, y2], [z1, z2], 'k-', linewidth=edge_length, alpha=0)
+
+    # Set axis labels
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+
+    # Set the first perspective
+    ax.view_init(elev=30, azim=45)
+    plt.title(f"Front", fontsize=14, pad=20)
+
+
+    # Save and return image
+    localhost = "http://127.0.0.1:8000/"
+    # localhost = 'https://tiba.inf.uni-konstanz.de/'
+    folder = "public/"
+    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(folder + path, format="svg", bbox_inches="tight")
+    url1 = localhost + folder + path
+    # url = localhost + path
+
+    # Set the second perspective
+    ax.view_init(elev=30, azim=80)
+    plt.title(f"Right", fontsize=14, pad=20)
+
+
+    # Save and return image
+    localhost = "http://127.0.0.1:8000/"
+    # localhost = 'https://tiba.inf.uni-konstanz.de/'
+    folder = "public/"
+    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(folder + path, format="svg", bbox_inches="tight")
+    url2 = localhost + folder + path
+    # url = localhost + path
+
+    # Set the second perspective
+    ax.view_init(elev=80, azim=45)
+    plt.title(f"Above", fontsize=14, pad=20)
+
+
+    # Save and return image
+    localhost = "http://127.0.0.1:8000/"
+    # localhost = 'https://tiba.inf.uni-konstanz.de/'
+    folder = "public/"
+    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(folder + path, format="svg", bbox_inches="tight")
+    url3 = localhost + folder + path
+    # url = localhost + path
+
+    plt.close("all")
+
+    return (url1,url2,url3)
+
+
+
+def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="average", setindices=False, color_threshold=0.2):
     # Convert the distance matrix to a condensed distance matrix
     dist_condensed = squareform(dist_matrix)
 
@@ -130,9 +222,9 @@ def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="a
 
     # Plot the dendrogram of the clustering
     plt.title(f"Dendrogram for {distance_alg} distances across transition networks", fontsize=14, pad=20)
-    plt.xlabel("Sample Index")
+    plt.xlabel("Index")
     plt.ylabel("Distance")
-    dendrogram(linkage(dist_condensed, method=linkage_method), labels=labels, truncate_mode="level")
+    dendrogram(linkage(dist_condensed, method=linkage_method), labels=labels, truncate_mode="level", color_threshold=color_threshold)
     
     # save and return image
     localhost = "http://127.0.0.1:8000/"
@@ -195,7 +287,7 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
 
     plt.xlabel("First Dimension")
     plt.ylabel("Second Dimension")
-    plt.title(f"2D embedding of {distance_alg} distances across transition networks", fontsize=14, pad=20)
+    plt.title(f"MDS embedding of {distance_alg} distances across transition networks", fontsize=14, pad=20)
 
     # get the current figure and adjust its size
     fig = plt.gcf()

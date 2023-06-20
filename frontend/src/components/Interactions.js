@@ -98,6 +98,8 @@ export default function Interactions(props) {
           name="i_min_edge_count"
           id="i_min_edge_count"
           min="0"
+          placeholder="0"
+          style={{ width: '200px' }}
           onChange={handleChange}
           onWheel={(e) => e.target.blur()}
         ></input>
