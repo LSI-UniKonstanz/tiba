@@ -21,6 +21,8 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+# django localhost to save images
+localhost = "http://127.0.0.1:8000/"
 
 def str_to_dist(s):
     """
@@ -141,48 +143,32 @@ def create_graph(dist_matrix, node_dict, distance_alg, setindices):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
-
     # Set the first perspective
     ax.view_init(elev=30, azim=45)
     plt.title(f"Front", fontsize=14, pad=20)
 
-
     # Save and return image
-    localhost = "http://127.0.0.1:8000/"
-    # localhost = 'https://tiba.inf.uni-konstanz.de/'
-    folder = "public/"
-    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
-    plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    url1 = localhost + folder + path
-    # url = localhost + path
+    path = "public/comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    url1 = localhost + path
 
     # Set the second perspective
     ax.view_init(elev=30, azim=80)
     plt.title(f"Right", fontsize=14, pad=20)
 
-
     # Save and return image
-    localhost = "http://127.0.0.1:8000/"
-    # localhost = 'https://tiba.inf.uni-konstanz.de/'
-    folder = "public/"
-    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
-    plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    url2 = localhost + folder + path
-    # url = localhost + path
+    path = "public/comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    url2 = localhost + path
 
-    # Set the second perspective
+    # Set the third perspective
     ax.view_init(elev=80, azim=45)
     plt.title(f"Above", fontsize=14, pad=20)
 
-
     # Save and return image
-    localhost = "http://127.0.0.1:8000/"
-    # localhost = 'https://tiba.inf.uni-konstanz.de/'
-    folder = "public/"
-    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
-    plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    url3 = localhost + folder + path
-    # url = localhost + path
+    path = "public/comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    url3 = localhost + path
 
     plt.close("all")
 
@@ -227,13 +213,9 @@ def hierarchical_cluster(dist_matrix, node_dict, distance_alg, linkage_method="a
     dendrogram(linkage(dist_condensed, method=linkage_method), labels=labels, truncate_mode="level", color_threshold=color_threshold)
     
     # save and return image
-    localhost = "http://127.0.0.1:8000/"
-    #localhost = 'https://tiba.inf.uni-konstanz.de/'
-    folder = "public/"
-    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
-    plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    url = localhost + folder + path
-    #url = localhost + path
+    path = "public/comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    url = localhost + path
     plt.close("all")
 
     return url
@@ -294,13 +276,9 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
     fig.set_size_inches(fig.get_size_inches() * 1.2) # scale by 20
 
     # save and return image
-    localhost = "http://127.0.0.1:8000/"
-    #localhost = 'https://tiba.inf.uni-konstanz.de/'
-    folder = "public/"
-    path = "comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
-    plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    url = localhost + folder + path
-    #url = localhost + path
+    path = "public/comparisons/comparisons-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    url = localhost + path
 
     plt.close("all")
 

@@ -11,9 +11,7 @@ import ExampleData from "../components/ExampleData";
 
 import "../css/layout.css";
 
-//const url = "https://tiba.inf.uni-konstanz.de/"
 const url = "http://127.0.0.1:8000/"
-
 
 export default class Generate extends Component {
   constructor() {

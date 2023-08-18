@@ -16,6 +16,9 @@ pd.options.mode.chained_assignment = None
 # use Agg for image generation, it runs better on the backend server
 matplotlib.use("Agg")
 
+# django localhost to save images
+localhost = "http://127.0.0.1:8000/"
+
 
 def interaction_network(
     df,
@@ -102,22 +105,17 @@ def interaction_network(
     G_dot = graphviz.Source(G_dot_string)
     G_dot.format = "svg"
 
-    # storage vars
-    # localhost = 'https://tiba.inf.uni-konstanz.de/'
-    localhost = "http://127.0.0.1:8000/"
-    folder = "public/"
-    path = "interactions/interactions-" + uuid.uuid4().hex
-    G_dot.render(folder + path + ".gv", view=False)
+    # save image
+    path = "public/interactions/interactions-" + uuid.uuid4().hex
+    G_dot.render(path + ".gv", view=False)
 
     # save graph as .gml
-    nx.write_gml(G, folder + path + ".gml")
+    nx.write_gml(G, path + ".gml")
 
-    # prod
-    # location = localhost + path + '.gv.svg'
-    # dev
-    location = localhost + folder + path + ".gv.svg"
+    # return url where image resides
+    url = localhost + path + ".gv.svg"
 
-    return location
+    return url
 
 
 def dataplot(df, behavior, id_list, bhvr_list):
@@ -198,17 +196,13 @@ def dataplot(df, behavior, id_list, bhvr_list):
     plt.yticks(yticks)
     plt.grid(linestyle="-", linewidth=0.2)
 
-    # storage vars
-    # localhost = 'https://tiba.inf.uni-konstanz.de/'
-    localhost = "http://127.0.0.1:8000/"
-    folder = "public/"
-    path = "plots/plot-" + uuid.uuid4().hex + ".svg"
-
-    plt.savefig(folder + path, format="svg", bbox_inches="tight")
-    # url = localhost + path
-    url = localhost + folder + path
-
+    # save image
+    path = "public/plots/plot-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
     plt.close("all")
+
+    # return url where image resides
+    url = localhost + path
 
     return url
 
@@ -608,19 +602,14 @@ def transition_network(
     G_dot = graphviz.Source(G_dot_string)
     G_dot.format = "svg"
 
-    # storage vars
-    # localhost = 'https://tiba.inf.uni-konstanz.de/'
-    localhost = "http://127.0.0.1:8000/"
-    folder = "public/"
-    path = "transitions/transitions-" + uuid.uuid4().hex
-    G_dot.render(folder + path + ".gv", view=False)
+    # save image
+    path = "public/transitions/transitions-" + uuid.uuid4().hex
+    G_dot.render(path + ".gv", view=False)
 
     # save graph as .gml
-    nx.write_gml(G, folder + path + ".gml")
+    nx.write_gml(G, path + ".gml")
 
-    # prod
-    # location = localhost + path + '.gv.svg'
-    # dev
-    location = localhost + folder + path + ".gv.svg"
+    # return url where images is saved
+    location = localhost + path + ".gv.svg"
 
     return location

@@ -2,7 +2,7 @@ djangorestframework
 django-cors-headers
 networkx
 graphviz
-pandas
+pandas==1.4.3
 matplotlib
 openpyxl
 natsort

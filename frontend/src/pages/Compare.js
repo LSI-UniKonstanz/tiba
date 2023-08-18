@@ -192,9 +192,9 @@ export default class Compare extends Component {
                 </option>
               </select>
               <br></br>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="setindices" checked={this.state.setindices} onChange={(e) => this.setState({ setindices: e.target.checked })}></input>
-                <label class="form-check-label" for="flexCheckDefault">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" value="" id="setindices" checked={this.state.setindices} onChange={(e) => this.setState({ setindices: e.target.checked })}></input>
+                <label className="form-check-label" htmlFor="flexCheckDefault">
                   <b>Enumerate</b> the uploaded data
                 </label>
               </div>
@@ -332,7 +332,7 @@ export default class Compare extends Component {
               <h3>3D graph prototype</h3>
               <div className="border background">
                 <p>edge length correspond to inverse edge weigth, networkx spring layout (randomized)</p>
-                <div class="image-container">
+                <div className="image-container">
                 <img src={this.state.image3} alt="need to load data and get distances first" />
                   <img  src={this.state.image4} alt="need to load data and get distances first" />
                   <img  src={this.state.image5} alt="need to load data and get distances first" />
