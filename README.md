@@ -28,7 +28,8 @@ cd tiba/
 python3 -m venv my_venv
 source my_venv/bin/activate
 pip3 install -r requirements.txt
-python3 backend/manage.py runserver
+cd backend/
+python3 manage.py runserver
 ```
 
 ## Workflow
