@@ -38,6 +38,6 @@ python3 manage.py runserver
 * Compare transition networks and visualize distances 
 
 ## Visualizations for selected sample Multifasciatus
-![Visualizations TIBA](https://github.com/LSI-UniKonstanz/tiba/assets/49905943/9ac73e7d-a6b9-46f2-9e36-64786d2dc72f)
+![Visualizations TIBA](/screenshots/visualizations.png)
 ## Comparison of transition networks 
-![Compare transitions TIBA](https://github.com/LSI-UniKonstanz/tiba/assets/49905943/4bf57062-de94-4580-844a-65e660fb7653)
+![Compare transitions TIBA](/screenshots/comparisons.png)
