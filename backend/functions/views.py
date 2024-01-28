@@ -59,11 +59,12 @@ class BehaviorPlotView(APIView):
         data = handle_upload(self.request.data["upload"])
         if data is False:
             return Response(status=204)
-        behavior = self.request.data["behavior"]
+        plot_categories = json.loads(self.request.data["plot_categories"])
+        separate = json.loads(self.request.data["separate"])
         # Load json stringified arrays
         id_list = json.loads(self.request.POST.get("id_list", None))
         bhvr_list = json.loads(self.request.POST.get("bhvr_list", None))
-        return_data = {"plot": dataplot(data, behavior, id_list, bhvr_list)}
+        return_data = {"plot": dataplot(data, plot_categories, id_list, bhvr_list, separate)}
         return Response(status=200, data=return_data)
 
 

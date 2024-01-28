@@ -3,7 +3,7 @@ import "../css/images.css";
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 import { Table } from "react-bootstrap";
 import { saveAs } from "file-saver";
-
+import CsvTable from "./CsvTable";
 
 export default function Transitions(props) {
 
@@ -90,6 +90,13 @@ export default function Transitions(props) {
     //.slice removes the .gv.svg at the end, then .gml is added as the other naming/location stays the same
     let url = props.graph.slice(0, -7) + ".gml"
     saveAs(url, props.upload_name.split(' ').join('_') + "_transitions");
+  }
+
+  // export statistics
+  const downloadStatistics = () => {
+    //.slice removes the .svg at the end, it works as graphviz is saving .gv and .gv.svg anyway when rendering
+    let url = props.graph.slice(0, -7) + "-statistics.csv"
+    saveAs(url, props.upload_name.split(' ').join('_') + "_interactions_statistics");
   }
 
   return (
@@ -402,8 +409,9 @@ export default function Transitions(props) {
             {/*download buttons for SVG, GV and GML files*/}
             <button type="button" className="btn btn-link custom-btn" onClick={downloadSVG}>{" "}{"\u21E9 export Image (.svg)"}{" "}</button>
             <button type="button" className="btn btn-link custom-btn" onClick={downloadGV}>{" "}{"\u21E9 export Graphviz (.gv)"}{" "}</button>
-            <button type="button" className="btn btn-link custom-btn" onClick={downloadGML}>{" "}{"\u21E9 export Graph Modeling Language (.gml)"}{" "}</button>
+            <button type="button" className="btn btn-link custom-btn" onClick={downloadStatistics}>{" "}{"\u21E9 export statistics (.csv)"}{" "}</button>
           </div>
+          {props.graph && (<CsvTable graph={props.graph.slice(0, -7) + "-statistics.csv"} />)}
         </div>
       </div>
 

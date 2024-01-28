@@ -255,3 +255,22 @@ def handle_upload(raw_data):
     df.behavioral_category.fillna("unknown", inplace=True)
 
     return df
+
+def determine_ytick_frequency(max_val):
+    if max_val < 11:
+        return 1
+    elif max_val < 26:
+        return 2
+    elif max_val < 51:
+        return 5
+    elif max_val < 101:
+        return 10
+    elif max_val < 201:
+        return 20
+    else:
+        return 50
+    
+# Custom sorting function to handle alphanumerical sorting
+def alphanum_key(s):
+    import re
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]

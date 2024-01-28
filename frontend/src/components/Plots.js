@@ -1,6 +1,8 @@
 import { React } from "react";
 import { Table } from "react-bootstrap";
 import { saveAs } from "file-saver";
+import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+
 
 export default function Plot(props) {
 
@@ -36,6 +38,17 @@ export default function Plot(props) {
     });
   }
 
+  //passes a new list after behavior selection to parent component Generate.js
+  const handleCategorySelect = (e) => {
+    const newList = toggleValueInList(props.p_cat_list, e.target.name)
+    props.passValues({
+      p_cat_list: newList,
+    });
+    props.passValues({
+      plot_new_config: true
+    });
+  }
+
   // accepts an list and an value. Adds the value if not present
   // and remove it if present
   function toggleValueInList(list, value) {
@@ -59,30 +72,77 @@ export default function Plot(props) {
     <div className="padded text">
       <h3>Behavior graph</h3>
       <div className="border background">
-        <p>The behavior graph displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.</p>
+        <p>The behavior graph displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.
+          <b>If the number of selected lineplots exceeds 10, only the first 10 lineplots, sorted in lexicographical order, will be displayed.</b></p>
         <br></br>
+        {/*switch behavioral categories / behaviors*/}
+        <div className="margin-switches">
+          <span><b>Selectable:</b>&nbsp;&nbsp;&nbsp;</span>
+          <BootstrapSwitchButton
+            onlabel='Behavioral categories'
+            offlabel='Behaviors'
+            offstyle="primary"
+            onstyle="primary"
+            width="300"
+            onChange={(checked) => {
+              props.passValues({ plot_categories: checked })
+              // Reset selected behaviors/categories onChange
+              if (checked) {
+                props.passValues({ p_bhvr_list: props.categories })
+              } else {
+                props.passValues({ p_bhvr_list: props.behaviors })
+              }
+              props.passValues({ plot_new_config: true, })
+            }}
+          />
+        </div>
+        {/*switch for cumulative or separate behaviors */}
+        <div className="margin-switches">
+          <span><b>Lineplots:</b>&nbsp;&nbsp;&nbsp;</span>
+          <BootstrapSwitchButton
+            onlabel='Separate'
+            offlabel='Cumulate'
+            offstyle="primary"
+            onstyle="primary"
+            width="300"
+            onChange={(checked) => {
+              props.passValues({ separate: checked })
+              props.passValues({ plot_new_config: true, })
+            }}
+          />
+        </div>
         <Table striped bordered hover>
           <thead>
             <tr>
               <th>Deselect Subjects</th>
-              <th>Deselect Behaviors</th>
+              {!props.plot_categories && (<th>Deselect Behaviors</th>)}
+              {props.plot_categories && (<th>Deselect Behavioral Categories</th>)}
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>
                 {props.ids.map(id => <span key={id}>
-                  <input type="checkbox" className="btn-check" id={'p' + id} name={id} autoComplete="off" onChange={handleIDSelect}></input>
-                  <label className="btn btn-primary custom-btn shadow-none" htmlFor={'p' + id}>{id}</label>
+                  <input type="checkbox" className="btn-check" id={'pid' + id} name={id} autoComplete="off" onChange={handleIDSelect}></input>
+                  <label className="btn btn-primary custom-btn shadow-none" htmlFor={'tid' + id}>{id}</label>
                 </span>)}
               </td>
-              <td>
+              {<td>
                 {/*display behaviors if network is using behaviors as nodes*/}
-                {props.behaviors.map(id => <span key={id}>
-                  <input type="checkbox" className="btn-check" id={'pb' + id} name={id} autoComplete="off" onChange={handleBehaviorSelect}></input>
-                  <label className="btn btn-primary custom-btn shadow-none" htmlFor={'pb' + id}>{id}</label>
-                </span>)}
-              </td>
+                {!props.plot_categories && (
+                  props.behaviors.map(id => <span key={id}>
+                    <input type="checkbox" className="btn-check" id={'pb' + id} name={id} autoComplete="off" onChange={handleBehaviorSelect}></input>
+                    <label className="btn btn-primary custom-btn shadow-none" htmlFor={'tb' + id}>{id}</label>
+                  </span>)
+                )}
+                {/*display categories if network is using categories as nodes*/}
+                {props.plot_categories && (
+                  props.categories.map(id => <span key={id}>
+                    <input type="checkbox" className="btn-check" id={'pc' + id} name={id} autoComplete="off" onChange={handleCategorySelect}></input>
+                    <label className="btn btn-primary custom-btn shadow-none" htmlFor={'tc' + id}>{id}</label>
+                  </span>)
+                )}
+              </td>}
             </tr>
           </tbody>
         </Table>

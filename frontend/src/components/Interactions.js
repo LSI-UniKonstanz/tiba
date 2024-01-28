@@ -2,7 +2,7 @@ import React from "react";
 import "../css/images.css";
 import { Table } from "react-bootstrap";
 import { saveAs } from "file-saver";
-
+import CsvTable from './CsvTable';  // Import the CsvTable component
 
 export default function Interactions(props) {
   /**
@@ -83,6 +83,13 @@ export default function Interactions(props) {
     saveAs(url, props.upload_name.split(' ').join('_') + "_interactions");
   }
 
+  // export statistics
+  const downloadStatistics = () => {
+    //.slice removes the .svg at the end, it works as graphviz is saving .gv and .gv.svg anyway when rendering
+    let url = props.graph.slice(0, -7) + "-statistics.csv"
+    saveAs(url, props.upload_name.split(' ').join('_') + "_interactions_statistics");
+  }
+
   return (
     <div className="padded text">
       <h3>Interaction network</h3>
@@ -140,9 +147,11 @@ export default function Interactions(props) {
           <button type="button" className="btn btn-link custom-btn" onClick={downloadSVG}>{" "}{"\u21E9 export Image (.svg)"}{" "}</button>
           <button type="button" className="btn btn-link custom-btn" onClick={downloadGV}>{" "}{"\u21E9 export Graphviz (.gv)"}{" "}</button>
           <button type="button" className="btn btn-link custom-btn" onClick={downloadGML}>{" "}{"\u21E9 export Graph Modeling Language (.gml)"}{" "}</button>
+          <button type="button" className="btn btn-link custom-btn" onClick={downloadStatistics}>{" "}{"\u21E9 export statistics (.csv)"}{" "}</button>
         </div>
+        {props.graph && (<CsvTable graph={props.graph.slice(0, -7) + "-statistics.csv"} />)}
         <div className="imgbox">
-          <img className="center-fit" src={props.graph} alt="loading ..." />
+          <img className="center-fit" src={props.graph} alt="unable to load" />
         </div>
       </div>
     </div>

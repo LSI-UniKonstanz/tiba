@@ -20,12 +20,7 @@ matplotlib.use("Agg")
 localhost = "http://127.0.0.1:8000/"
 
 
-def interaction_network(
-    df,
-    id_list,
-    mod1_list,
-    threshold=1,
-):
+def interaction_network(df, id_list, mod1_list, threshold=1):
     """
     The interaction network displays the number and direction of interactions between individuals.
     It is a directed weighted network where edges are drawn from individual A to individual B if A is
@@ -35,90 +30,115 @@ def interaction_network(
 
     :param df: The dataframe containing the behavior data
     :param id_list: list of selected subjects (emanating behavior)
-    :param mod1_list: list of selecte modifiers (incoming behavior)
-    :threshold: Threshold for edges to be displayed
-
+    :param mod1_list: list of selected modifiers (incoming behavior)
+    :param threshold: Threshold for edges to be displayed
+    :return: URL where the generated image resides
     """
 
-    # remove behavior with no interaction partner and irrelevant data
+    # Filter relevant columns
     interactions_df = df[df.modifier_1.notna()]
     interactions_df = interactions_df[["subject", "modifier_1"]]
 
-    # Drop rows which include unselected Subjects
-    remove_id_list = []
+    # Drop rows not in id_list
     if "dummy" not in id_list:
-        remove_id_list = [
-            x for x in interactions_df.subject.unique() if x not in id_list
-        ]
-        for x in remove_id_list:
-            interactions_df = interactions_df.drop(
-                interactions_df[interactions_df.subject == x].index
-            )
+        interactions_df = interactions_df[interactions_df.subject.isin(id_list)]
 
-    # Drop rows which include unselected Modifier 1s
-    remove_mod1_list = []
+    # Drop rows not in mod1_list
     if "dummy" not in mod1_list:
-        remove_mod1_list = [
-            x for x in interactions_df.modifier_1.unique() if x not in mod1_list
-        ]
-        for x in remove_mod1_list:
-            interactions_df = interactions_df.drop(
-                interactions_df[interactions_df.modifier_1 == x].index
-            )
+        interactions_df = interactions_df[interactions_df.modifier_1.isin(mod1_list)]
 
-    # create a dataframe for the edges
-    edges_df = (
-        interactions_df.groupby(["subject", "modifier_1"])
-        .size()
-        .to_frame(name="records")
-        .reset_index()
-    )
+    # Create a dataframe for the edges
+    edges_df = interactions_df.groupby(["subject", "modifier_1"]).size().reset_index(name="records")
 
-    # remove edges below the threshold
+    # Remove edges below the threshold
     edges_df = edges_df[edges_df.records >= threshold]
 
-    # add tuples and records as attributes for the network generation
+    # Prepare attributes for the network generation
     edges_df["tuples"] = list(zip(edges_df.subject, edges_df.modifier_1))
-    edge_attributes_label = dict(zip(edges_df.tuples, edges_df.records))
+    edges_df["weight"] = edges_df.records * 3 / edges_df.records.max()
 
-    # change for edge weight
-    edges_df.records = edges_df.records * 3 / edges_df.records.max()
-    edge_attributes_weight = dict(zip(edges_df.tuples, edges_df.records))
+    # Set minimal value for edge penwidth so all edges are visible
+    edges_df["weight"] = edges_df["weight"].apply(lambda x: max(0.2, x))
 
-    # set minimal value for edge penwidth so all edges are visible
-    for k, v in edge_attributes_weight.items():
-        if v < 0.2:
-            edge_attributes_weight[k] = 0.2
-
-    # create directed graph with networkx
+    # Create directed graph with networkx
     G = nx.DiGraph()
     G.add_edges_from(edges_df.tuples)
 
-    # edge labels
+    # Edge labels and weights
+    edge_attributes_label = dict(zip(edges_df.tuples, edges_df.records))
+    edge_attributes_label_inv = dict(zip(edges_df.tuples, 1/edges_df.records))
+    edge_attributes_weight = dict(zip(edges_df.tuples, edges_df["weight"]))
     nx.set_edge_attributes(G, edge_attributes_label, name="label")
-
-    # edge weight
+    nx.set_edge_attributes(G, edge_attributes_label_inv, name="label_inv")
     nx.set_edge_attributes(G, edge_attributes_weight, name="penwidth")
 
-    # graphviz
+    # Generate graphviz
     G_dot_string = to_pydot(G).to_string()
     G_dot = graphviz.Source(G_dot_string)
     G_dot.format = "svg"
 
-    # save image
-    path = "public/interactions/interactions-" + uuid.uuid4().hex
+    # Save image
+    path = f"public/interactions/interactions-{uuid.uuid4().hex}"
+    #path = f"../public/interactions/interactions-{uuid.uuid4().hex}"
     G_dot.render(path + ".gv", view=False)
 
-    # save graph as .gml
+    # Save graph as .gml
     nx.write_gml(G, path + ".gml")
 
-    # return url where image resides
+    # Return URL where the image resides
     url = localhost + path + ".gv.svg"
+    
+    # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
+    node_data = []
+    for node in G.nodes:
+        ingoing_edges = G.in_edges(node, data=True)
+        outgoing_edges = G.out_edges(node, data=True)
+
+        ingoing_count = len(ingoing_edges)
+        outgoing_count = len(outgoing_edges)
+        ingoing_label_sum = sum(edge[2]['label'] for edge in ingoing_edges )
+        outgoing_label_sum = sum(edge[2]['label'] for edge in outgoing_edges )
+        
+        # Calculate centrality measures
+        in_centrality = nx.in_degree_centrality(G).get(node, 0)
+        out_centrality = nx.out_degree_centrality(G).get(node, 0)
+        total_centrality = nx.degree_centrality(G).get(node, 0)
+        
+        # Calculate additional centrality measures
+        closeness_centrality = nx.closeness_centrality(G).get(node, 0)
+        betweenness_centrality = nx.betweenness_centrality(G).get(node, 0)
+
+        
+        # Calculate additional centrality measures with inverse edge label as weight
+        closeness_centrality_w_inv = nx.closeness_centrality(G, distance='label_inv').get(node, 0)
+        betweenness_centrality_w_inv = nx.betweenness_centrality(G, weight='label_inv').get(node, 0)
+
+
+        
+        node_data.append({
+            'ID': node,
+            '#Ingoing': ingoing_label_sum,
+            '#Outgoing': outgoing_label_sum,
+            '#IngoingEdges': ingoing_count,
+            '#OutgoingEdges': outgoing_count,
+            'InDegreeCen.': in_centrality,
+            'OutDegreeCen.': out_centrality,
+            #'TotalCentrality': total_centrality,
+            'ClosenessCen.': closeness_centrality,
+            #'ClosenessCentrality incl. e.w. ': closeness_centrality_w_inv,
+            'BetweennessCen.': betweenness_centrality,
+            #'BetweennessCentrality incl .e.w.': betweenness_centrality_w_inv,
+        })
+
+    statistics_df = pd.DataFrame(node_data)
+    # Sort the DataFrame alphanumerically by the 'ID' column
+    statistics_sorted = statistics_df.sort_values(by='ID', key=lambda x: x.map(alphanum_key))
+    # Save the DataFrame to CSV
+    statistics_sorted.to_csv(path + "-statistics.csv", index=False)
 
     return url
 
-
-def dataplot(df, behavior, id_list, bhvr_list):
+def dataplot(df, plot_categories, id_list, bhvr_list, separate):
     """
     The behavior graph displays the temporal occurrences of behavioral events.
     It maps values from the column Time to the x axis and the cumulative count of behaviors shown
@@ -130,69 +150,72 @@ def dataplot(df, behavior, id_list, bhvr_list):
     :param behavior: The single behavior or behavioral category to plot
     :param id_list: list of selected subjects
     :param bhvr_list: list of selected behaviors
+    :param cumulative: accumulate different behaviors for one individual
     """
 
     # Only use Starting behaviors to not double count
     df = df[df.status != "STOP"]
 
+    # Init with behavior or behavioral category
+    if (plot_categories==False):
+        df['selected'] = df['behavior'].copy()
+    else:
+        df['selected'] = df['behavioral_category'].copy()
+
+        
     # Hacky solution: if frontend has not yet initialized the id_list, then use all IDs
     if "dummy" in id_list:
         id_list = get_fish_ids(df)
 
+    # Remove rows with unselected behaviors
+    if "dummy" not in bhvr_list:
+        df = df[df.selected.isin(bhvr_list)]
+
     # Init empty figure for the plot
-    fig = plt.figure(figsize=(9, 7))
+    fig = plt.figure(figsize=(10, 6))
     average = pd.DataFrame()
     highest_plot = 0
-
-    remove_bhvr_list = []
-    # Init list with behaviors to remove from dataframes
-    if "dummy" not in bhvr_list:
-        remove_bhvr_list = [x for x in df.behavior.unique() if x not in bhvr_list]
+    plot_counter = 0
 
     plt.gca().set_prop_cycle(None)
     # loop over all fish_ids and plot their amount of selected interactions
     for fish in id_list:
-        fish_df = df[df.subject == fish]
+        if (plot_counter >= 10):
+            break     
+        fish_df = df[df.subject == fish]    
+        
+        if(separate==True):   
+            # Optionally split behavior lines for one individual
+            for behvr in fish_df.selected.unique():
+                if (plot_counter >= 10):
+                    break
 
-        # Remove rows with unselected behaviors
-        for x in remove_bhvr_list:
-            fish_df = fish_df.drop(fish_df[fish_df.behavior == x].index)
-
-        if len(fish_df) + 1 > highest_plot:
-            highest_plot = len(fish_df) + 1
-        sum_of_rows = range(1, len(fish_df) + 1)
-        plt.plot(fish_df.time, sum_of_rows, label=fish)
-
-    plt.gca().set_prop_cycle(None)
-
-    # loop over all fish ids and make the beginning  before the first behavior of the fish
-    # loop over all fish_ids and plot their amount of selected interactions
-    for fish in id_list:
-        fish_df = df[df.subject == fish]
-        # Remove rows with unselected behaviors
-        for x in remove_bhvr_list:
-            fish_df = fish_df.drop(fish_df[fish_df.behavior == x].index)
-
-        plt.plot([0, fish_df.time.min()], [0, 1])
-
+                behvr_df = fish_df[fish_df.selected == behvr]
+                highest_plot = max(highest_plot, len(behvr_df) + 1)
+                sum_of_rows = range(1, len(behvr_df)+1)
+                if (len(sum_of_rows) > 0):
+                    plot_counter += 1
+                    plt.plot(behvr_df.time, sum_of_rows, label=fish+" - "+behvr)
+                    
+        elif(separate==False):
+            if (plot_counter >= 10):
+                break
+            highest_plot = max(highest_plot, len(fish_df) + 1)
+            sum_of_rows = range(1, len(fish_df) + 1)
+            if (len(sum_of_rows) > 0):
+                plot_counter += 1
+                plt.plot(fish_df.time, sum_of_rows, label=fish)
+                
     # add legend and edge labels
-    plt.legend()
-    plt.xlabel("Time", fontsize=18, labelpad=10)
+    # Place the legend to the right and adjust the layout
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    #plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.xlabel("Time (s)", fontsize=18, labelpad=10)
     plt.ylabel("Number of selected events", fontsize=18, labelpad=10)
 
-    # make frequency of yticks dependent on size of the highest plot
-    if highest_plot < 11:
-        yticks = range(0, highest_plot)
-    elif highest_plot < 26:
-        yticks = range(0, highest_plot, 2)
-    elif highest_plot < 51:
-        yticks = range(0, highest_plot, 5)
-    elif highest_plot < 101:
-        yticks = range(0, highest_plot, 10)
-    elif highest_plot < 201:
-        yticks = range(0, highest_plot, 20)
-    else:
-        yticks = range(0, highest_plot, 50)
+    ytick_frequency = determine_ytick_frequency(highest_plot)
+    yticks = range(0, highest_plot, ytick_frequency)
+
     plt.yticks(yticks)
     plt.grid(linestyle="-", linewidth=0.2)
 
@@ -429,6 +452,8 @@ def transition_network(
         nodes_df = nodes_df.sort_values(by="avg_time", ascending=False)
 
     # print behavior nodes and amount
+        
+    save_nodes_df = nodes_df.copy()
 
     # lineare normalisierung einbauen -> Fläche soll entsprechen
 
@@ -611,5 +636,53 @@ def transition_network(
 
     # return url where images is saved
     location = localhost + path + ".gv.svg"
+
+    print(nodes_df)
+
+    # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
+    node_data = []
+    for node in G.nodes:
+        ingoing_edges = G.in_edges(node, data=True)
+        outgoing_edges = G.out_edges(node, data=True)
+
+        ingoing_count = len(ingoing_edges)
+        outgoing_count = len(outgoing_edges)
+        ingoing_label_sum = sum(edge[2]['label'] for edge in ingoing_edges )
+        outgoing_label_sum = sum(edge[2]['label'] for edge in outgoing_edges )
+
+        # Calculate records, average_time and total_time (hacky, improve!)
+        avg_time_value = np.where(save_nodes_df['node'] == node, save_nodes_df['avg_time'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
+        total_time_value = np.where(save_nodes_df['node'] == node, save_nodes_df['total_time'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
+        record_value = np.where(save_nodes_df['node'] == node, save_nodes_df['record'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
+
+        print()
+        # Calculate centrality measures
+        in_centrality = nx.in_degree_centrality(G).get(node, 0)
+        out_centrality = nx.out_degree_centrality(G).get(node, 0)
+        
+        # Calculate additional centrality measures
+        closeness_centrality = nx.closeness_centrality(G).get(node, 0)
+        betweenness_centrality = nx.betweenness_centrality(G).get(node, 0)
+
+        
+        node_data.append({
+            'ID': node,
+            'AverageTime': avg_time_value,
+            'TotalTime': total_time_value,
+            '#Occurences': record_value,
+            '#IngoingEdges': ingoing_count,
+            '#OutgoingEdges': outgoing_count,
+            'InDegreeCen.': in_centrality,
+            'OutDegreeCen.': out_centrality,
+            'ClosenessCen.': closeness_centrality,
+            'BetweennessCen.': betweenness_centrality,
+        })
+
+    statistics_df = pd.DataFrame(node_data)
+    # Sort the DataFrame alphanumerically by the 'ID' column
+    statistics_sorted = statistics_df.sort_values(by='ID', key=lambda x: x.map(alphanum_key))
+    # Save the DataFrame to CSV
+    statistics_sorted.to_csv(path + "-statistics.csv", index=False)
+
 
     return location

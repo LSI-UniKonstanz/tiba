@@ -36,12 +36,14 @@ export default class Generate extends Component {
       i_id_list: ['dummy'],
       i_mod1_list: ['dummy'],
       // Behavior Plot
-      behavior: null,
+      plot_categories: false,
       show_grid: true,
       p_image: null,
+      separate: false,
       options: ["dummy"],
       p_id_list: ['dummy'],
       p_bhvr_list: ['dummy'],
+      p_cat_list: ['dummy'],
       // Transition network
       option: false,
       min_edge_count: 0,
@@ -122,12 +124,16 @@ export default class Generate extends Component {
   getBehaviorPlot = async () => {
     const formData = new FormData();
     formData.append("upload", this.state["upload"]);
-    formData.append("behavior", this.state.behavior);
+    formData.append("plot_categories", this.state.plot_categories);
+    formData.append("separate", this.state.separate);
     // Selection of IDs
     formData.append("id_list", JSON.stringify(this.state.p_id_list));
-    // Selection of Behaviors
-    formData.append("bhvr_list", JSON.stringify(this.state.p_bhvr_list));
-
+    // Selection of behaviors/categories
+    if (this.state.plot_categories) {
+      formData.append('bhvr_list', JSON.stringify(this.state.p_cat_list));
+    } else {
+      formData.append("bhvr_list", JSON.stringify(this.state.p_bhvr_list));
+    }
     await fetch(url + "api/behaviorplot/", {
       method: "POST",
       body: formData,
@@ -160,6 +166,7 @@ export default class Generate extends Component {
           i_mod1_list: data.modifier_1s,
           p_id_list: data.ids,
           p_bhvr_list: data.behaviors,
+          p_cat_list: data.categories,
           t_id_list: data.ids,
           t_bhvr_list: data.behaviors,
           t_cat_list: data.categories,
@@ -205,12 +212,14 @@ export default class Generate extends Component {
       i_id_list: ['dummy'],
       i_mod1_list: ['dummy'],
       //specific for behavior plot
-      behavior: null,
+      plot_categories: false,
       show_grid: true,
       p_image: null,
+      separate: false,
       options: ["dummy"],
       p_id_list: ['dummy'],
       p_bhvr_list: ['dummy'],
+      p_cat_list: ['dummy'],
       //specific for transition network
       option: false,
       min_edge_count: 0,
@@ -302,12 +311,14 @@ export default class Generate extends Component {
       i_id_list: ['dummy'],
       i_mod1_list: ['dummy'],
       //specific for behavior plot
-      behavior: null,
+      plot_categories: false,
       show_grid: true,
       p_image: null,
+      separate: false,
       options: ["dummy"],
       p_id_list: ['dummy'],
       p_bhvr_list: ['dummy'],
+      p_cat_list: ['dummy'],
       //specific for transition network
       option: false,
       min_edge_count: 0,
@@ -391,8 +402,10 @@ export default class Generate extends Component {
             ids={this.state.ids}
             behaviors={this.state.behaviors}
             categories={this.state.categories}
+            plot_categories={this.state.plot_categories}
             p_id_list={this.state.p_id_list}
             p_bhvr_list={this.state.p_bhvr_list}
+            p_cat_list={this.state.p_cat_list}
             //upload name needed to name exported images
             upload_name={this.state.upload_name}
             plot_new_config={this.state.plot_new_config}
