@@ -20,7 +20,7 @@ matplotlib.use("Agg")
 localhost = "http://127.0.0.1:8000/"
 
 
-def interaction_network(df, id_list, mod1_list, threshold=1):
+def interaction_network(df, id_list, mod1_list, hue, node_color, node_size, threshold=1):
     """
     The interaction network displays the number and direction of interactions between individuals.
     It is a directed weighted network where edges are drawn from individual A to individual B if A is
@@ -31,9 +31,13 @@ def interaction_network(df, id_list, mod1_list, threshold=1):
     :param df: The dataframe containing the behavior data
     :param id_list: list of selected subjects (emanating behavior)
     :param mod1_list: list of selected modifiers (incoming behavior)
+    :param color_hue: value on the color cycle
+    :param node_color_map: map x \in [total time, average time, count of occurences] to node color saturation
+    :param node_size_map: map x \in [total time, average time, count of occurences] to node size
     :param threshold: Threshold for edges to be displayed
     :return: URL where the generated image resides
     """
+    print( hue, node_color, node_size)
 
     # Filter relevant columns
     interactions_df = df[df.modifier_1.notna()]
@@ -63,6 +67,9 @@ def interaction_network(df, id_list, mod1_list, threshold=1):
     # Create directed graph with networkx
     G = nx.DiGraph()
     G.add_edges_from(edges_df.tuples)
+    
+    #path = f"public/interactions/interactions-{uuid.uuid4().hex}"
+    path = f"public/interactions/interactions-{uuid.uuid4().hex}"
 
     # Edge labels and weights
     edge_attributes_label = dict(zip(edges_df.tuples, edges_df.records))
@@ -72,22 +79,6 @@ def interaction_network(df, id_list, mod1_list, threshold=1):
     nx.set_edge_attributes(G, edge_attributes_label_inv, name="label_inv")
     nx.set_edge_attributes(G, edge_attributes_weight, name="penwidth")
 
-    # Generate graphviz
-    G_dot_string = to_pydot(G).to_string()
-    G_dot = graphviz.Source(G_dot_string)
-    G_dot.format = "svg"
-
-    # Save image
-    path = f"public/interactions/interactions-{uuid.uuid4().hex}"
-    #path = f"../public/interactions/interactions-{uuid.uuid4().hex}"
-    G_dot.render(path + ".gv", view=False)
-
-    # Save graph as .gml
-    nx.write_gml(G, path + ".gml")
-
-    # Return URL where the image resides
-    url = localhost + path + ".gv.svg"
-    
     # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
     node_data = []
     for node in G.nodes:
@@ -121,12 +112,12 @@ def interaction_network(df, id_list, mod1_list, threshold=1):
             '#Outgoing': outgoing_label_sum,
             '#IngoingEdges': ingoing_count,
             '#OutgoingEdges': outgoing_count,
-            'InDegreeCen.': in_centrality,
-            'OutDegreeCen.': out_centrality,
+            'In-Deg.Cen.': in_centrality,
+            'Out-Deg.Cen.': out_centrality,
             #'TotalCentrality': total_centrality,
-            'ClosenessCen.': closeness_centrality,
+            'Closen.Cen.': closeness_centrality,
             #'ClosenessCentrality incl. e.w. ': closeness_centrality_w_inv,
-            'BetweennessCen.': betweenness_centrality,
+            'Between.Cen.': betweenness_centrality,
             #'BetweennessCentrality incl .e.w.': betweenness_centrality_w_inv,
         })
 
@@ -135,7 +126,54 @@ def interaction_network(df, id_list, mod1_list, threshold=1):
     statistics_sorted = statistics_df.sort_values(by='ID', key=lambda x: x.map(alphanum_key))
     # Save the DataFrame to CSV
     statistics_sorted.to_csv(path + "-statistics.csv", index=False)
+    
+    # Map centralities to node size or color
+    area_max = 0.2
+    if node_size == "indeg":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['In-Deg.Cen.'] * area_max / 2 * math.pi)
+    elif node_size == "outdeg":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['Out-Deg.Cen.'] * area_max / 2 * math.pi)
+    elif node_size == "betweenness":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['Between.Cen.'] * area_max / 2 * math.pi)
+    elif node_size == "closeness":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['Closen.Cen.'] * area_max / 2 * math.pi) 
+    
+    if node_size in ['indeg', 'outdeg', 'betweenness', 'closeness']:
+        nodes_width = dict(zip(statistics_df['ID'], statistics_df.radius * 2))
+        nodes_height = dict(zip(statistics_df['ID'], statistics_df.radius))
+        nx.set_node_attributes(G, nodes_width, name="width")
+        nx.set_node_attributes(G, nodes_height, name="height")
 
+    hue = hue / 360
+    if node_color == "indeg":
+        statistics_df["color"] = str(hue) + " " + statistics_df['In-Deg.Cen.'].astype(str) + " 1"
+    elif node_color == "outdeg":
+        statistics_df["color"] = str(hue) + " " + statistics_df['Out-Deg.Cen.'].astype(str) + " 1"
+    elif node_color == "betweenness":
+        statistics_df["color"] = str(hue) + " " + statistics_df['Between.Cen.'].astype(str) + " 1"
+    elif node_color == "closeness":
+        statistics_df["color"] = str(hue) + " " + statistics_df['Closen.Cen.'].astype(str) + " 1"
+
+    if node_color in ['indeg', 'outdeg', 'betweenness', 'closeness']:
+        nodes_color = dict(zip(statistics_df['ID'], statistics_df.color))
+        nx.set_node_attributes(G, nodes_color, name="fillcolor")
+        nx.set_node_attributes(G, "filled", name="style")
+        
+    # Generate graphviz
+    G_dot_string = to_pydot(G).to_string()
+    G_dot = graphviz.Source(G_dot_string)
+    G_dot.format = "svg"
+
+    # Save image
+    G_dot.render(path + ".gv", view=False)
+
+    # Save graph as .gml
+    nx.write_gml(G, path + ".gml")
+
+    # Return URL where the image resides
+    #url = path + ".gv.svg"
+    url = localhost + path + ".gv.svg"
+    
     return url
 
 def dataplot(df, plot_categories, id_list, bhvr_list, separate):
@@ -313,19 +351,16 @@ def transition_network(
         local_df["chosen_data"] = local_df["behavior"]
 
     successor_list = []
-    # Remove behaviors/categories which are unselected by the user
+    
+    # Remove behaviors/categories that are unselected by the user
     if "dummy" not in bhvr_list:
-        remove_bhvr_list = [
-            x for x in local_df.chosen_data.unique() if x not in bhvr_list
-        ]
-        for x in remove_bhvr_list:
-            local_df = local_df.drop(df[df.chosen_data == x].index)
+        # Filter rows based on selected behaviors
+        local_df = local_df[local_df.chosen_data.isin(bhvr_list)]
 
     # Loop through dataframe for each fish and add behavior and successor
     for fish in id_list:
         id_frame = local_df[local_df.subject == fish]
-        if not (with_status):
-            id_frame = id_frame.drop(id_frame[id_frame.status == "STOP"].index)
+        id_frame = id_frame.drop(id_frame[id_frame.status == "STOP"].index)
         i = 0
         k = i + 1
         while i < len(id_frame) - 1:
@@ -344,16 +379,7 @@ def transition_network(
     successor_df = pd.DataFrame(
         successor_list, columns=["action_1", "status_1", "action_2", "status_2"]
     )
-    if with_status:
-        successor_df["plain_behavior"] = successor_df["action_1"]
-        successor_df["action_1"] = (
-            successor_df["action_1"] + " " + successor_df["status_1"]
-        )
-        successor_df["action_2"] = (
-            successor_df["action_2"] + " " + successor_df["status_2"]
-        )
-    else:
-        successor_df = successor_df.replace(to_replace="POINT", value="")
+    successor_df = successor_df.replace(to_replace="POINT", value="")
 
     successor_df["tuples"] = list(zip(successor_df.action_1, successor_df.action_2))
     successor_df = (
@@ -386,8 +412,8 @@ def transition_network(
         pass
 
     # add average and total time
-    times_list = get_total_and_avg_time(df, id_list)
-    times_df = pd.DataFrame(times_list, columns=["action_1", "total_time", "avg_time"])
+    times_list = get_total_time(local_df, id_list)
+    times_df = pd.DataFrame(times_list, columns=["action_1", "total_time"])
 
     # work on the nodes(behaviors) of the graph so we can later set node-attributes for graphviz
     nodes_df = edges_df[["action_1", "records"]]
@@ -397,15 +423,19 @@ def transition_network(
         .to_frame(name="records")
         .reset_index()
     )
-    nodes_df = pd.merge(times_df, nodes_df, on="action_1", how="outer")
-    nodes_df.columns = ["node", "total_time", "avg_time", "record"]
 
+    nodes_df = pd.merge(times_df, nodes_df, on="action_1", how="outer")
+    nodes_df.columns = ["node", "total_time", "record"]
+    # Assuming nodes_df is your DataFrame
+    nodes_df["avg_time"] = np.where((nodes_df["record"] == 0) | (nodes_df["total_time"].isna()) | (nodes_df["record"].isna()),0,nodes_df["total_time"] / nodes_df["record"])
     # if a behavior occurs only once/ as last behavior maybe of an animal it is not counted
-    if not (with_status):
-        nodes_df.record = nodes_df.record.fillna(1)
+    nodes_df = nodes_df[['node', 'total_time', 'avg_time', 'record']]
+
+    nodes_df.record = nodes_df.record.fillna(1)
     # round results
     nodes_df.total_time = nodes_df.total_time.round(2)
     nodes_df.avg_time = nodes_df.avg_time.round(2)
+    
 
     # merge nodes with amount and times in the dataframe for the tuples so
     # they can be displayed inside the node as label
@@ -454,8 +484,6 @@ def transition_network(
     # print behavior nodes and amount
         
     save_nodes_df = nodes_df.copy()
-
-    # lineare normalisierung einbauen -> Fläche soll entsprechen
 
     # logarithmic max-min normalization of record, avg_time and total_time
     if logarithmic_normalization:
@@ -506,15 +534,16 @@ def transition_network(
     # node colour dependent on user input, values are normalized with np.log and then a dictionary
     # for node colour is created to give it to graphviz later
     hue = hue / 360
-    if node_colour == "amount":
-        nodes_df["colour"] = str(hue) + " " + nodes_df["record"].astype(str) + " 1"
-        nodes_colour = dict(zip(nodes_df.node, nodes_df.colour))
-    elif node_colour == "total_time":
-        nodes_df["colour"] = str(hue) + " " + nodes_df["total_time"].astype(str) + " 1"
-        nodes_colour = dict(zip(nodes_df.node, nodes_df.colour))
-    elif node_colour == "avg_time":
-        nodes_df["colour"] = str(hue) + " " + nodes_df["avg_time"].astype(str) + " 1"
-        nodes_colour = dict(zip(nodes_df.node, nodes_df.colour))
+    if not colored:
+        if node_colour == "amount":
+            nodes_df["colour"] = str(hue) + " " + nodes_df["record"].astype(str) + " 1"
+            nodes_colour = dict(zip(nodes_df.node, nodes_df.colour))
+        elif node_colour == "total_time":
+            nodes_df["colour"] = str(hue) + " " + nodes_df["total_time"].astype(str) + " 1"
+            nodes_colour = dict(zip(nodes_df.node, nodes_df.colour))
+        elif node_colour == "avg_time":
+            nodes_df["colour"] = str(hue) + " " + nodes_df["avg_time"].astype(str) + " 1"
+            nodes_colour = dict(zip(nodes_df.node, nodes_df.colour))
 
     # create directed graph
     G = nx.DiGraph()
@@ -561,52 +590,19 @@ def transition_network(
         nx.set_edge_attributes(G, edge_attributes_label, name="weight")
 
     # set node attributes
-    nx.set_node_attributes(G, nodes_width, name="width")
-    nx.set_node_attributes(G, nodes_height, name="height")
-    if not with_status:
+    if not colored and node_colour in ['amount', 'total_time', 'avg_time']:
         nx.set_node_attributes(G, nodes_colour, name="fillcolor")
-    nx.set_node_attributes(G, "filled", name="style")
+        nx.set_node_attributes(G, "filled", name="style")
+
     # create list with all nodes and give each a distinct color
     if colored:
         unique_nodes = nodes_df.node
-        color_list = [
-            "orangered1",
-            "orange1",
-            "orchid1",
-            "palegreen",
-            "paleturquoise4",
-            "slategray3",
-            "darkseagreen2",
-            "yellowgreen",
-            "burlywood",
-            "khaki",
-            "red",
-            "gold",
-            "turquoise",
-            "darkgoldenrod2",
-            "deeppink2",
-            "silver",
-            "aqua",
-            "bisque",
-            "aquamarine2",
-            "beige",
-            "azure4",
-        ]
+        color_list = ["orangered1", "orange1", "orchid1", "palegreen", "paleturquoise4", "slategray3", "darkseagreen2", "yellowgreen", "burlywood", "khaki", "red", "gold", "turquoise", "darkgoldenrod2", "deeppink2", "silver", "aqua", "bisque", "aquamarine2", "beige", "azure4"]
 
-        try:
-            unique_node_colours
-        except NameError:
-            var_exists = False
-        else:
-            var_exists = True
-
-        if not (var_exists):
-            unique_node_colours = dict(zip(unique_nodes, color_list))
-
-        if behaviour_key:
-            unique_node_colours[behaviour_key] = colour_value
+        unique_node_colours = dict(zip(unique_nodes, color_list))
 
         nx.set_node_attributes(G, unique_node_colours, name="fillcolor")
+        nx.set_node_attributes(G, "filled", name="style")
         # give same color to all edges outgoing from the same node
         edges_df["edge_color"] = "white"
         for key in unique_node_colours.keys():
@@ -622,24 +618,7 @@ def transition_network(
     # add avg time as node attribute
     nx.set_node_attributes(G, nodes_attributes_avg_time, name="avg_time")
 
-    # graphviz
-    G_dot_string = to_pydot(G).to_string()
-    G_dot = graphviz.Source(G_dot_string)
-    G_dot.format = "svg"
-
-    # save image
-    path = "public/transitions/transitions-" + uuid.uuid4().hex
-    G_dot.render(path + ".gv", view=False)
-
-    # save graph as .gml
-    nx.write_gml(G, path + ".gml")
-
-    # return url where images is saved
-    location = localhost + path + ".gv.svg"
-
-    print(nodes_df)
-
-    # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
+   # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
     node_data = []
     for node in G.nodes:
         ingoing_edges = G.in_edges(node, data=True)
@@ -655,16 +634,15 @@ def transition_network(
         total_time_value = np.where(save_nodes_df['node'] == node, save_nodes_df['total_time'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
         record_value = np.where(save_nodes_df['node'] == node, save_nodes_df['record'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
 
-        print()
         # Calculate centrality measures
         in_centrality = nx.in_degree_centrality(G).get(node, 0)
         out_centrality = nx.out_degree_centrality(G).get(node, 0)
-        
+
         # Calculate additional centrality measures
         closeness_centrality = nx.closeness_centrality(G).get(node, 0)
         betweenness_centrality = nx.betweenness_centrality(G).get(node, 0)
 
-        
+
         node_data.append({
             'ID': node,
             'AverageTime': avg_time_value,
@@ -672,17 +650,67 @@ def transition_network(
             '#Occurences': record_value,
             '#IngoingEdges': ingoing_count,
             '#OutgoingEdges': outgoing_count,
-            'InDegreeCen.': in_centrality,
-            'OutDegreeCen.': out_centrality,
-            'ClosenessCen.': closeness_centrality,
-            'BetweennessCen.': betweenness_centrality,
+            'In-Deg.Cen.': in_centrality,
+            'Out-Deg.Cen.': out_centrality,
+            'Closen.Cen.': closeness_centrality,
+            'Between.Cen.': betweenness_centrality,
         })
 
     statistics_df = pd.DataFrame(node_data)
     # Sort the DataFrame alphanumerically by the 'ID' column
     statistics_sorted = statistics_df.sort_values(by='ID', key=lambda x: x.map(alphanum_key))
+
+
+    # Map centralities to node size or color
+    if node_size == "indeg":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['In-Deg.Cen.'] * area_max / 2 * math.pi)
+    elif node_size == "outdeg":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['Out-Deg.Cen.'] * area_max / 2 * math.pi)
+    elif node_size == "betweenness":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['Between.Cen.'] * area_max / 2 * math.pi)
+    elif node_size == "closeness":
+        statistics_df["radius"] = 2 * np.sqrt(statistics_df['Closen.Cen.'] * area_max / 2 * math.pi) 
+    
+    if node_size in ['indeg', 'outdeg', 'betweenness', 'closeness']:
+        nodes_width = dict(zip(statistics_df['ID'], statistics_df.radius * 2))
+        nodes_height = dict(zip(statistics_df['ID'], statistics_df.radius))
+
+    if not colored:
+        if node_colour == "indeg":
+            statistics_df["colour"] = str(hue) + " " + statistics_df['In-Deg.Cen.'].astype(str) + " 1"
+        elif node_colour == "outdeg":
+            statistics_df["colour"] = str(hue) + " " + statistics_df['Out-Deg.Cen.'].astype(str) + " 1"
+        elif node_colour == "betweenness":
+            statistics_df["colour"] = str(hue) + " " + statistics_df['Between.Cen.'].astype(str) + " 1"
+        elif node_colour == "closeness":
+            statistics_df["colour"] = str(hue) + " " + statistics_df['Closen.Cen.'].astype(str) + " 1"
+
+        if node_colour in ['indeg', 'outdeg', 'betweenness', 'closeness']:
+            nodes_colour = dict(zip(statistics_df['ID'], statistics_df.colour))
+            nx.set_node_attributes(G, nodes_colour, name="fillcolor")
+            nx.set_node_attributes(G, "filled", name="style")
+
+    # set node attributes
+    nx.set_node_attributes(G, nodes_width, name="width")
+    nx.set_node_attributes(G, nodes_height, name="height")
+
+    # graphviz
+    G_dot_string = to_pydot(G).to_string()
+    G_dot = graphviz.Source(G_dot_string)
+    G_dot.format = "svg"
+
+    # save image
+    path = "public/transitions/transitions-" + uuid.uuid4().hex
+    G_dot.render(path + ".gv", view=False)
+    # save graph as .gml
+    nx.write_gml(G, path + ".gml")
+
     # Save the DataFrame to CSV
-    statistics_sorted.to_csv(path + "-statistics.csv", index=False)
-
-
-    return location
+    statistics_sorted.to_csv( path + "-statistics.csv", index=False)
+    
+    # return url where images is saved
+    #playground
+    #url =  path + ".gv.svg"
+    url = localhost + path + ".gv.svg"
+    
+    return url

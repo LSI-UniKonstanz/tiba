@@ -95,21 +95,112 @@ export default function Interactions(props) {
       <h3>Interaction network</h3>
       <div className="border background">
 
-        <p>The interaction network displays the number and direction of interactions between individuals. It is a directed weighted network where edges are drawn from individual A to individual B if A is the subject of a behavior and B is the recipient (i.e. the corresponding value in the optional column <i>Modifier</i>). The number of interactions determines the weight of an edge. Individuals may be deselected and a weight threshold for edges to be displayed may be set.</p>
+        <p>The interaction network displays the number and direction of interactions between individuals. It is a directed weighted network where edges are drawn from individual A to individual B if A is the subject of a behavior and B is the recipient (i.e. the corresponding value in the optional column <i>Modifier</i>). The number of interactions determines the weight of an edge. Individuals may be deselected and a weight threshold for edges to be displayed may be set. In the context of network analysis, centrality measures are used to identify the most important nodes or actors within a network. </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.in_degree_centrality.html#networkx.algorithms.centrality.in_degree_centrality" target="_blank" rel="noopener noreferrer">In-Degree Centrality</a> quantifies the number of incoming edges to a node, it is indicative of popularity or influence within the network, as it reflects the extent to which a node is the target of interactions.
+        </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.out_degree_centrality.html#networkx.algorithms.centrality.out_degree_centrality" target="_blank" rel="noopener noreferrer">Out-Degree Centrality</a> quantifies the number of outgoing edges from a node in an interaction network. Nodes with high out-degree centrality are actively engaging with other nodes, potentially serving as sources of information, influence, or resources.
+        </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.closeness_centrality.html#networkx.algorithms.centrality.closeness_centrality" target="_blank" rel="noopener noreferrer">Closeness Centrality</a> considers the average distance from a node to all other nodes. Nodes with high closeness centrality are well-connected.
+        </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.betweenness_centrality.html#networkx.algorithms.centrality.betweenness_centrality" target="_blank" rel="noopener noreferrer">Betweenness Centrality</a> measures the frequency with which a node lies on the shortest paths between pairs of other nodes. Betweenness centrality identifies nodes that act as crucial intermediaries or bridges within an interaction network.
+        </p>
         <br></br>
+        <hr className="hr"></hr>
+        <div className="left-panel">
+          <span><b>Remove edges below:</b>&nbsp;&nbsp;&nbsp;</span>
+          <input
+            type="number"
+            className="form-control"
+            name="i_min_edge_count"
+            id="i_min_edge_count"
+            min="0"
+            placeholder="0"
+            style={{ width: '200px' }}
+            onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+          ></input>
+        </div>
 
-        <span><b>Remove edges below:</b>&nbsp;&nbsp;&nbsp;</span>
-        <input
-          type="number"
-          className="form-control"
-          name="i_min_edge_count"
-          id="i_min_edge_count"
-          min="0"
-          placeholder="0"
-          style={{ width: '200px' }}
-          onChange={handleChange}
-          onWheel={(e) => e.target.blur()}
-        ></input>
+        <div className="right-panel">
+          {/*node size mapping*/}
+          <div className="mappings">
+            <label className="form-check-label" htmlFor="i_node_size_map">
+              <b>Node size mapping</b>&nbsp;
+            </label>
+            <select
+              className="form-select"
+              name="i_node_size_map"
+              id="i_node_size_map"
+              onChange={handleChange}
+            >
+              <option key="-" value="-">
+                -
+              </option>
+              <option key="indeg" value="indeg">
+                In-Degree Centrality
+              </option>
+              <option key="outdeg" value="outdeg">
+                Out-Degree Centrality
+              </option>
+              <option key="closeness" value="closeness">
+                Closeness Centrality
+              </option>
+              <option key="betweenness" value="betweenness">
+                Betweenness Centrality
+              </option>
+            </select>
+          </div>
+
+          {/*node color mapping*/}
+          <div className="mappings">
+            <label className="form-check-label" htmlFor="i_node_color_map">
+              <b>Node color density mapping</b>&nbsp;
+            </label>
+            <select
+              className="form-select"
+              name="i_node_color_map"
+              id="i_node_color_map"
+              onChange={handleChange}
+            >
+              <option key="-" value="-">
+                -
+              </option>
+              <option key="indeg" value="indeg">
+                In-Degree Centrality
+              </option>
+              <option key="outdeg" value="outdeg">
+                Out-Degree Centrality
+              </option>
+              <option key="closeness" value="closeness">
+                Closeness Centrality
+              </option>
+              <option key="betweenness" value="betweenness">
+                Betweenness Centrality
+              </option>
+            </select>
+          </div>
+
+          {/*color hue */}
+          <div className="mappings">
+            <span><b>Color hue:</b>&nbsp;&nbsp;&nbsp;</span>
+            <input
+              className="form-range"
+              name="i_color_hue"
+              id="i_color_hue"
+              type="range"
+              min="0"
+              max="180"
+              step="10"
+              onChange={handleChange}
+              onWheel={(e) => e.target.blur()}
+            ></input>
+          </div>
+        </div>
+
         <br className="br"></br>
 
         <Table striped bordered hover>
@@ -151,7 +242,7 @@ export default function Interactions(props) {
         </div>
         {props.graph && (<CsvTable graph={props.graph.slice(0, -7) + "-statistics.csv"} />)}
         <div className="imgbox">
-          <img className="center-fit" src={props.graph} alt="unable to load" />
+          <img className="center-fit" src={props.graph} alt="unable to load, bad parameters" />
         </div>
       </div>
     </div>

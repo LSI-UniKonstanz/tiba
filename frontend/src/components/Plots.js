@@ -73,8 +73,9 @@ export default function Plot(props) {
       <h3>Behavior graph</h3>
       <div className="border background">
         <p>The behavior graph displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.
-          <b>If the number of selected lineplots exceeds 10, only the first 10 lineplots, sorted in lexicographical order, will be displayed.</b></p>
+          </p><p><b> If the number of selected lineplots exceeds 10, only the first 10 lineplots, sorted in lexicographical order, will be displayed.</b></p>
         <br></br>
+        <hr></hr>
         {/*switch behavioral categories / behaviors*/}
         <div className="margin-switches">
           <span><b>Selectable:</b>&nbsp;&nbsp;&nbsp;</span>
@@ -124,7 +125,7 @@ export default function Plot(props) {
               <td>
                 {props.ids.map(id => <span key={id}>
                   <input type="checkbox" className="btn-check" id={'pid' + id} name={id} autoComplete="off" onChange={handleIDSelect}></input>
-                  <label className="btn btn-primary custom-btn shadow-none" htmlFor={'tid' + id}>{id}</label>
+                  <label className="btn btn-primary custom-btn shadow-none" htmlFor={'pid' + id}>{id}</label>
                 </span>)}
               </td>
               {<td>
@@ -132,14 +133,14 @@ export default function Plot(props) {
                 {!props.plot_categories && (
                   props.behaviors.map(id => <span key={id}>
                     <input type="checkbox" className="btn-check" id={'pb' + id} name={id} autoComplete="off" onChange={handleBehaviorSelect}></input>
-                    <label className="btn btn-primary custom-btn shadow-none" htmlFor={'tb' + id}>{id}</label>
+                    <label className="btn btn-primary custom-btn shadow-none" htmlFor={'pb' + id}>{id}</label>
                   </span>)
                 )}
                 {/*display categories if network is using categories as nodes*/}
                 {props.plot_categories && (
                   props.categories.map(id => <span key={id}>
                     <input type="checkbox" className="btn-check" id={'pc' + id} name={id} autoComplete="off" onChange={handleCategorySelect}></input>
-                    <label className="btn btn-primary custom-btn shadow-none" htmlFor={'tc' + id}>{id}</label>
+                    <label className="btn btn-primary custom-btn shadow-none" htmlFor={'pc' + id}>{id}</label>
                   </span>)
                 )}
               </td>}
@@ -157,7 +158,7 @@ export default function Plot(props) {
           <button type="button" className="btn btn-link custom-btn" onClick={downloadSVG}>{" "}{"\u21E9 export Image (.svg)"}{" "}</button>
         </div>
         <div className="imgbox">
-          <img className="center-fit" src={props.image} alt="not loaded" />
+          <img className="center-fit" src={props.image} alt="unable to load, bad parameters" />
         </div>
       </div>
     </div >

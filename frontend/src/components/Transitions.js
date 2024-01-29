@@ -104,7 +104,19 @@ export default function Transitions(props) {
       <div className="text">
         <h3>Behavior transition network</h3>
         <div className="border background">
-          <p>The behavior transition network displays temporal sequences of behavioral events. It is a directed, weighted network where the nodes represent either behaviors or behavioral categories and edges represent the transition from one behavior to another. Either the number of transitions or the transitional frequencies, i.e. the relative frequency with which a certain behavior follows another behavior, may be used as edge weighting. Individual behaviors, behavioral categories or individuals may be deselected and thereby excluded from the calculation and visualization. Node appearance may be altered by mapping the total number of behaviors, the average or total time of behaviors to node size, node color saturation or a label inside the node. The width of drawn edges may either be fixed or dependent on the weights, also a threshold for edges to be displayed may be set. Edge width, node size and node saturation may be normalized either in a linear or logarithmic fashion. Two color options are available: either each node and its outgoing edges have distinctive colors or a color is set and the nodes differentiate in the color saturation dependent on the mapping.</p>
+          <p>The behavior transition network displays temporal sequences of behavioral events. It is a directed, weighted network where the nodes represent either behaviors or behavioral categories and edges represent the transition from one behavior to another. Either the number of transitions or the transitional frequencies, i.e. the relative frequency with which a certain behavior follows another behavior, may be used as edge weighting. Individual behaviors, behavioral categories or individuals may be deselected and thereby excluded from the calculation and visualization. Node appearance may be altered by mapping the total number of behaviors, the average or total time of behaviors to node size, node color saturation or a label inside the node. The width of drawn edges may either be fixed or dependent on the weights, also a threshold for edges to be displayed may be set. Edge width, node size and node saturation may be normalized either in a linear or logarithmic fashion. Two color options are available: either each node and its outgoing edges have distinctive colors or a color is set and the nodes differentiate in the color saturation dependent on the mapping. In the context of network analysis, centrality measures are used to identify the most important nodes or actors within a network. It is possible to map the centralities to node size and color density. </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.in_degree_centrality.html#networkx.algorithms.centrality.in_degree_centrality" target="_blank" rel="noopener noreferrer">In-Degree Centrality</a>  quantifies the number of incoming transitions to a specific behavior. Behaviors with high in-degree centrality have a variety of possible preceding behaviors.
+        </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.out_degree_centrality.html#networkx.algorithms.centrality.out_degree_centrality" target="_blank" rel="noopener noreferrer">Out-Degree Centrality</a> quantifies the number of outgoing transitions from a particular behavior. Behaviors with high out-degree centrality have a variety of possible subsequent behaviors.
+        </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.closeness_centrality.html#networkx.algorithms.centrality.closeness_centrality" target="_blank" rel="noopener noreferrer">Closeness Centrality</a> considers the average distance from a behavior to all other behaviors. Closeness centrality in a behavior transition network assesses how quickly a behavior can be reached from other behaviors in terms of behavioral transitions.
+        </p>
+        <p>
+        <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.betweenness_centrality.html#networkx.algorithms.centrality.betweenness_centrality" target="_blank" rel="noopener noreferrer">Betweenness Centrality</a> measures the frequency with which a behavior lies on the shortest paths between pairs of other behaviors. Betweenness centrality in a behavior transition network identifies behaviors that act as critical connectors between other behaviors.
+        </p>
 
           <br></br>
           <hr className="hr"></hr>
@@ -268,13 +280,22 @@ export default function Transitions(props) {
                 <option key="4" value="amount">
                   Number of occurences
                 </option>
+                <option key="indeg" value="indeg">
+                  In-Degree Centrality
+                </option>
+                <option key="outdeg" value="outdeg">
+                  Out-Degree Centrality
+                </option>
+                <option key="closeness" value="closeness">
+                  Closeness Centrality
+                </option>
+                <option key="betweenness" value="betweenness">
+                  Betweenness Centrality
+                </option>
               </select>
             </div>
             {/*node label mapping*/}
             <div className="mappings">
-              {/*               <label className="form-check-label" htmlFor="node_label_map">
-                Map <b>node label</b>&nbsp;to
-              </label> */}
               <span><b>Node label mapping:</b>&nbsp;&nbsp;&nbsp;</span>
 
               <select
@@ -320,6 +341,18 @@ export default function Transitions(props) {
                   </option>
                   <option key="4" value="amount">
                     Number of occurences
+                  </option>
+                  <option key="indeg" value="indeg">
+                    In-Degree Centrality
+                  </option>
+                  <option key="outdeg" value="outdeg">
+                    Out-Degree Centrality
+                  </option>
+                  <option key="closeness" value="closeness">
+                    Closeness Centrality
+                  </option>
+                  <option key="betweenness" value="betweenness">
+                    Betweenness Centrality
                   </option>
                 </select>
               </div>
@@ -419,7 +452,7 @@ export default function Transitions(props) {
 
       {/*image display*/}
       <div className="imgbox">
-        <img className="center-fit" src={props.graph} alt="loading ..." />
+        <img className="center-fit" src={props.graph} alt="unable to load, bad parameters" />
       </div>
 
     </div>

@@ -47,9 +47,12 @@ class InteractionView(APIView):
         id_list = json.loads(self.request.POST.get("id_list", None))
         mod1_list = json.loads(self.request.POST.get("mod1_list", None))
         min_edge_count = json.loads(self.request.data["min_edge_count"])
+        hue = json.loads(self.request.data["color_hue"])
+        node_color_map = self.request.data["node_color_map"]
+        node_size_map = self.request.data["node_size_map"]
 
         return_data = {
-            "graph": interaction_network(data, id_list, mod1_list, min_edge_count)
+            "graph": interaction_network(data, id_list, mod1_list,hue, node_color_map, node_size_map, min_edge_count)
         }
         return Response(status=200, data=return_data)
 

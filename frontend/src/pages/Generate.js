@@ -33,6 +33,9 @@ export default class Generate extends Component {
       // Interaction Network
       i_min_edge_count: 0,
       i_graph: null,
+      i_color_hue: 150,
+      i_node_color_map: "-",
+      i_node_size_map: "-",
       i_id_list: ['dummy'],
       i_mod1_list: ['dummy'],
       // Behavior Plot
@@ -111,6 +114,9 @@ export default class Generate extends Component {
     // Selection of IDs
     formData.append("id_list", JSON.stringify(this.state.i_id_list));
     formData.append("mod1_list", JSON.stringify(this.state.i_mod1_list));
+    formData.append("color_hue", this.state["i_color_hue"]);
+    formData.append("node_color_map", this.state["i_node_color_map"]);
+    formData.append("node_size_map", this.state["i_node_size_map"]);
     formData.append("min_edge_count", this.state["i_min_edge_count"]);
 
     await fetch(url + "api/interactions/", {
@@ -209,6 +215,9 @@ export default class Generate extends Component {
       //specific for interaction network
       i_min_edge_count: 0,
       i_graph: null,
+      i_color_hue: 150,
+      i_node_color_map: "-",
+      i_node_size_map: "-",
       i_id_list: ['dummy'],
       i_mod1_list: ['dummy'],
       //specific for behavior plot
@@ -308,6 +317,9 @@ export default class Generate extends Component {
       //specific for interaction network
       i_min_edge_count: 0,
       i_graph: null,
+      i_color_hue: 150,
+      i_node_color_map: "-",
+      i_node_size_map: "-",
       i_id_list: ['dummy'],
       i_mod1_list: ['dummy'],
       //specific for behavior plot

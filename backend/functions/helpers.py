@@ -29,7 +29,7 @@ def get_unique_modifier1s(df):
     return modifier_1s
 
 
-def get_total_and_avg_time(df, fish_ids):
+def get_total_time(df, fish_ids):
     """
     Retrieves the total and average time a behavior is shown for specified subjects.
 
@@ -43,20 +43,12 @@ def get_total_and_avg_time(df, fish_ids):
     for behavior in behavior_ids:
         behavior_df = df[df.chosen_data == behavior]
         total = 0
-        avg = 0
         for fish in fish_ids:
             id_frame = behavior_df[behavior_df.subject == fish]
             stop_total = id_frame[id_frame.status == "STOP"].time.sum()
             start_total = id_frame[id_frame.status == "START"].time.sum()
             total = total + stop_total - start_total
-        occurences = len(behavior_df[behavior_df.status == "START"].index)
-        if math.isnan(occurences) or (occurences < 1):
-            occurences = 1
-        if total == 0.0:
-            avg = 0.0
-        else:
-            avg = total / occurences
-        time_list.append((behavior, total, avg))
+        time_list.append((behavior, total))
     return time_list
 
 
