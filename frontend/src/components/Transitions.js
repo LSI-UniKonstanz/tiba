@@ -147,7 +147,7 @@ export default function Transitions(props) {
             <div className="margin-switches">
               <span><b>Edge values:</b>&nbsp;&nbsp;&nbsp;</span>
               <BootstrapSwitchButton
-                onlabel='Transition probability'
+                onlabel='Transitional frequency'
                 offlabel='Amount of transitions'
                 offstyle="primary"
                 onstyle="primary"
@@ -180,7 +180,7 @@ export default function Transitions(props) {
             <div className="margin-switches">
               <span><b>Color setting:</b>&nbsp;&nbsp;&nbsp;</span>
               <BootstrapSwitchButton
-                onlabel='Distinct colors'
+                onlabel='Unique colors by beh.category'
                 offlabel='One color, differences in density'
                 offstyle="primary"
                 onstyle="primary"
@@ -390,6 +390,8 @@ export default function Transitions(props) {
                   type="range"
                   min="1"
                   max="15"
+                  step="1"
+                  default="3"
                   onChange={handleChange}
                   onWheel={(e) => e.target.blur()}
                 ></input>

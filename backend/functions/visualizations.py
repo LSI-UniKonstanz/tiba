@@ -411,9 +411,10 @@ def transition_network(
     except:
         pass
 
+
     # add average and total time
-    times_list = get_total_time(local_df, id_list)
-    times_df = pd.DataFrame(times_list, columns=["action_1", "total_time"])
+    times_list = get_total_time_and_category(local_df, id_list)
+    times_df = pd.DataFrame(times_list, columns=["action_1", "total_time", "category"])
 
     # work on the nodes(behaviors) of the graph so we can later set node-attributes for graphviz
     nodes_df = edges_df[["action_1", "records"]]
@@ -425,11 +426,10 @@ def transition_network(
     )
 
     nodes_df = pd.merge(times_df, nodes_df, on="action_1", how="outer")
-    nodes_df.columns = ["node", "total_time", "record"]
+    nodes_df.columns = ["node", "total_time", "category", "record"]
     # Assuming nodes_df is your DataFrame
     nodes_df["avg_time"] = np.where((nodes_df["record"] == 0) | (nodes_df["total_time"].isna()) | (nodes_df["record"].isna()),0,nodes_df["total_time"] / nodes_df["record"])
     # if a behavior occurs only once/ as last behavior maybe of an animal it is not counted
-    nodes_df = nodes_df[['node', 'total_time', 'avg_time', 'record']]
 
     nodes_df.record = nodes_df.record.fillna(1)
     # round results
@@ -437,13 +437,12 @@ def transition_network(
     nodes_df.avg_time = nodes_df.avg_time.round(2)
     
 
-    # merge nodes with amount and times in the dataframe for the tuples so
-    # they can be displayed inside the node as label
+    # Change node label if user maps total/avg time or record to node label
     labels_1 = nodes_df.copy()
-    labels_1.columns = ["action_1", "total_time_1", "avg_time_1", "record_1"]
+    labels_1.columns = ["action_1", "total_time_1", "category", "avg_time_1", "record_1"]
     edges_df = pd.merge(edges_df, labels_1, on="action_1", how="left")
     labels_2 = nodes_df.copy()
-    labels_2.columns = ["action_2", "total_time_2", "avg_time_2", "record_2"]
+    labels_2.columns = ["action_2", "total_time_2", "category", "avg_time_2", "record_2"]
     edges_df = pd.merge(edges_df, labels_2, on="action_2", how="left")
 
     if node_label == "amount":
@@ -474,15 +473,7 @@ def transition_network(
         edges_df["tuples"] = list(zip(edges_df["action_1"], edges_df["action_2"]))
         nodes_df["node"] = nodes_df["node"] + " - " + nodes_df["avg_time"].astype(str)
 
-    if sort_by == "amount":
-        nodes_df = nodes_df.sort_values(by="record", ascending=False)
-    elif sort_by == "total_time":
-        nodes_df = nodes_df.sort_values(by="total_time", ascending=False)
-    else:
-        nodes_df = nodes_df.sort_values(by="avg_time", ascending=False)
-
-    # print behavior nodes and amount
-        
+    # Save dataframe with absolute (non-normalized) values
     save_nodes_df = nodes_df.copy()
 
     # logarithmic max-min normalization of record, avg_time and total_time
@@ -594,31 +585,44 @@ def transition_network(
         nx.set_node_attributes(G, nodes_colour, name="fillcolor")
         nx.set_node_attributes(G, "filled", name="style")
 
-    # create list with all nodes and give each a distinct color
+        
+    # Handle unique node coloring
     if colored:
-        unique_nodes = nodes_df.node
-        color_list = ["orangered1", "orange1", "orchid1", "palegreen", "paleturquoise4", "slategray3", "darkseagreen2", "yellowgreen", "burlywood", "khaki", "red", "gold", "turquoise", "darkgoldenrod2", "deeppink2", "silver", "aqua", "bisque", "aquamarine2", "beige", "azure4"]
+        # Create a DataFrame with unique nodes and their corresponding behavioral category
+        unique_nodes_df = save_nodes_df[['node', 'category']]
 
-        unique_node_colours = dict(zip(unique_nodes, color_list))
+        # Sort unique behavioral categories
+        sorted_categories = sorted(unique_nodes_df['category'].unique())
 
-        nx.set_node_attributes(G, unique_node_colours, name="fillcolor")
+        # Use a hash function to generate consistent colors for each category
+        normalized_hashes = [hash(category) % (2**32 - 1) for category in sorted_categories]
+        normalized_values = np.array(normalized_hashes) / (2**32 - 1)
+
+        # Get colors from the 'tab20' colormap, ensuring each color is unique
+        color_list = plt.cm.get_cmap('tab20')(np.linspace(0, 1, len(sorted_categories)))
+
+
+        # Convert RGBA to hexadecimal color code
+        color_list_hex = [matplotlib.colors.rgb2hex(color) for color in color_list]
+
+        # Create a color map for behavioral categories
+        category_color_map = dict(zip(sorted_categories, color_list_hex))
+
+        # Assign node colors based on the behavioral category
+        node_colors = {node: category_color_map[category] for node, category in zip(unique_nodes_df['node'], unique_nodes_df['category'])}
+        nx.set_node_attributes(G, node_colors, name="fillcolor")
         nx.set_node_attributes(G, "filled", name="style")
-        # give same color to all edges outgoing from the same node
-        edges_df["edge_color"] = "white"
-        for key in unique_node_colours.keys():
-            edges_df["edge_color"] = np.where(
-                edges_df["action_1"] == key,
-                unique_node_colours.get(key),
-                edges_df["edge_color"],
-            )
 
+        # Assign edge colors based on the source node's behavioral category
+        edges_df["edge_color"] = edges_df["action_1"].map(node_colors.get).fillna("white")
         distinct_edge_colors = dict(zip(edges_df.tuples, edges_df.edge_color))
         nx.set_edge_attributes(G, distinct_edge_colors, name="color")
 
+        
     # add avg time as node attribute
     nx.set_node_attributes(G, nodes_attributes_avg_time, name="avg_time")
 
-   # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
+    # Create a DataFrame with ingoing and outgoing edges count and sum of edge labels for each ID
     node_data = []
     for node in G.nodes:
         ingoing_edges = G.in_edges(node, data=True)
@@ -629,10 +633,11 @@ def transition_network(
         ingoing_label_sum = sum(edge[2]['label'] for edge in ingoing_edges )
         outgoing_label_sum = sum(edge[2]['label'] for edge in outgoing_edges )
 
-        # Calculate records, average_time and total_time (hacky, improve!)
-        avg_time_value = np.where(save_nodes_df['node'] == node, save_nodes_df['avg_time'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
-        total_time_value = np.where(save_nodes_df['node'] == node, save_nodes_df['total_time'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
-        record_value = np.where(save_nodes_df['node'] == node, save_nodes_df['record'], np.nan)[np.where(save_nodes_df['node'] == node)][0]
+        # Calculate records, average_time and total_time 
+        mask = save_nodes_df['node'] == node
+        avg_time_value = save_nodes_df.loc[mask, 'avg_time'].values[0] if any(mask) else np.nan
+        total_time_value = save_nodes_df.loc[mask, 'total_time'].values[0] if any(mask) else np.nan
+        record_value = save_nodes_df.loc[mask, 'record'].values[0] if any(mask) else np.nan
 
         # Calculate centrality measures
         in_centrality = nx.in_degree_centrality(G).get(node, 0)
