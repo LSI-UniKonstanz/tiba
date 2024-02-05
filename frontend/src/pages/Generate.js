@@ -5,6 +5,7 @@ import Introduction from "../components/Introduction";
 import Transitions from "../components/Transitions";
 import Interactions from "../components/Interactions";
 import Plots from "../components/Plots";
+import Barplot from "../components/Barplot";
 import Infos from "../components/Infos";
 import Upload from "../components/Upload";
 import ExampleData from "../components/ExampleData";
@@ -47,6 +48,15 @@ export default class Generate extends Component {
       p_id_list: ['dummy'],
       p_bhvr_list: ['dummy'],
       p_cat_list: ['dummy'],
+      // Barplot
+      barplot_plot_categories: false,
+      barplot_image: null,
+      barplot_relative: false,
+      barplot_id_list: ['dummy'],
+      barplot_bhvr_list: ['dummy'],
+      barplot_cat_list: ['dummy'],
+      request_new_barplot: true,
+      barplot_new_config: false,
       // Transition network
       option: false,
       min_edge_count: 0,
@@ -63,6 +73,7 @@ export default class Generate extends Component {
       t_bhvr_list: ['dummy'],
       t_cat_list: ['dummy'],
       custom_edge_thickness: false,
+      // For All charts/networks
       request_new_plot: true,
       plot_new_config: false,
       request_new_interactions: true,
@@ -148,6 +159,29 @@ export default class Generate extends Component {
       .then((data) => this.setState({ p_image: data.plot }));
   };
 
+  getBarplot = async () => {
+    const formData = new FormData();
+    formData.append("upload", this.state["upload"]);
+    formData.append("plot_categories", this.state.barplot_plot_categories);
+    formData.append("relative", this.state.barplot_relative);
+    // Selection of IDs
+    formData.append("id_list", JSON.stringify(this.state.barplot_id_list));
+    // Selection of behaviors/categories
+    if (this.state.plot_categories) {
+      formData.append('bhvr_list', JSON.stringify(this.state.barplot_cat_list));
+    } else {
+      formData.append("bhvr_list", JSON.stringify(this.state.barplot_bhvr_list));
+    }
+    await fetch(url + "api/barplot/", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => this.setState({ barplot_image: data.plot }));
+  };
+
+
+
   /**
    * fetches general information on dataset after upload or example pick
    */
@@ -173,6 +207,9 @@ export default class Generate extends Component {
           p_id_list: data.ids,
           p_bhvr_list: data.behaviors,
           p_cat_list: data.categories,
+          barplot_id_list: data.ids,
+          barplot_bhvr_list: data.behaviors,
+          barplot_cat_list: data.categories,
           t_id_list: data.ids,
           t_bhvr_list: data.behaviors,
           t_cat_list: data.categories,
@@ -229,6 +266,15 @@ export default class Generate extends Component {
       p_id_list: ['dummy'],
       p_bhvr_list: ['dummy'],
       p_cat_list: ['dummy'],
+      // Barplot
+      barplot_plot_categories: false,
+      barplot_image: null,
+      barplot_relative: false,
+      barplot_id_list: ['dummy'],
+      barplot_bhvr_list: ['dummy'],
+      barplot_cat_list: ['dummy'],
+      request_new_barplot: true,
+      barplot_new_config: false,
       //specific for transition network
       option: false,
       min_edge_count: 0,
@@ -258,6 +304,7 @@ export default class Generate extends Component {
       trackPromise(this.getTransitions())
       trackPromise(this.getInteractions());
       trackPromise(this.getBehaviorPlot());
+      trackPromise(this.getBarplot());
     });
   };
 
@@ -273,6 +320,20 @@ export default class Generate extends Component {
     });
     // reset value of apply button
     this.state.request_new_plot = false
+  };
+
+  // updates all state vars related to barplot
+  updateBarplot = (obj) => {
+    this.setState({ [Object.keys(obj)[0]]: obj[Object.keys(obj)[0]] }, () => {
+      // if apply button has been clicked then request new calculation, otherwise just set vars
+      if (this.state.request_new_barplot) {
+        trackPromise(
+          this.getBarplot()
+        );
+      }
+    });
+    // reset value of apply button
+    this.state.request_new_barplot = false
   };
 
   updateInteractionNetwork = (obj) => {
@@ -331,6 +392,15 @@ export default class Generate extends Component {
       p_id_list: ['dummy'],
       p_bhvr_list: ['dummy'],
       p_cat_list: ['dummy'],
+      // Barplot
+      barplot_plot_categories: false,
+      barplot_image: null,
+      barplot_relative: false,
+      barplot_id_list: ['dummy'],
+      barplot_bhvr_list: ['dummy'],
+      barplot_cat_list: ['dummy'],
+      request_new_barplot: true,
+      barplot_new_config: false,
       //specific for transition network
       option: false,
       min_edge_count: 0,
@@ -361,8 +431,10 @@ export default class Generate extends Component {
       trackPromise(this.getTransitions());
       trackPromise(this.getInteractions());
       trackPromise(this.getBehaviorPlot());
+      trackPromise(this.getBarplot());
     });
   };
+
   updateUploadName = (obj) => {
     this.setState(
       { [Object.keys(obj)[0]]: obj[Object.keys(obj)[0]] },
@@ -405,6 +477,24 @@ export default class Generate extends Component {
             />
           )}
         </div>
+        {/* Distinct Behaviors Chart */}
+        {this.state.upload_successful && !this.state.reset_params && (
+          <Barplot
+            passValues={this.updateBarplot}
+            image={this.state.barplot_image}
+            ids={this.state.ids}
+            behaviors={this.state.behaviors}
+            categories={this.state.categories}
+            plot_categories={this.state.barplot_plot_categories}
+            barplot_id_list={this.state.barplot_id_list}
+            barplot_bhvr_list={this.state.barplot_bhvr_list}
+            barplot_cat_list={this.state.barplot_cat_list}
+            //upload name needed to name exported images
+            upload_name={this.state.upload_name}
+            barplot_new_config={this.state.barplot_new_config}
+          />
+        )}
+
         {/* Behavior-Time-Relation */}
         {this.state.upload_successful && !this.state.reset_params && (
           <Plots

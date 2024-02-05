@@ -267,6 +267,88 @@ def dataplot(df, plot_categories, id_list, bhvr_list, separate):
 
     return url
 
+def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
+    """
+    The bar plot displays the count of occurrences for each distinct value in df['selected'] for a specific individual.
+
+    `Required`
+    :param df: Dataframe containing the behavior data
+    :param set_behavior: The single behavior or behavioral category to plot
+    :param animal_id: ID of the individual for which to create the bar plot
+    :param bhvr_list: List of selected behaviors
+    :param relative: If True, normalize the bar heights to represent relative frequencies
+    """
+
+    # Only use Starting behaviors to not double count
+    df = df[df.status != "STOP"]
+
+    # Init with behavior or behavioral category
+    if plot_categories:
+        df['selected'] = df['behavioral_category'].copy()
+    else:
+        df['selected'] = df['behavior'].copy()
+
+    if "dummy" in id_list:
+        id_list = get_fish_ids(df)
+
+    # Only keep rows for individuals in id_list
+    individual_df = df[df['subject'].isin(id_list)]
+
+    # Remove rows with unselected behaviors
+    if "dummy" not in bhvr_list:
+        individual_df = individual_df[individual_df.selected.isin(bhvr_list)]
+
+    # Init empty figure for the plot
+    fig, ax = plt.subplots(figsize=(9, 7))
+
+    plt.gca().set_prop_cycle(None)
+
+    # Define distinct colors for each behavior
+    colors = matplotlib.cm.tab20.colors[:len(individual_df['selected'].unique())]
+
+    # Loop over all distinct values in df['selected'] (e.g., df['behavior'])
+    for i, value in enumerate(sorted(individual_df['selected'].unique())):
+        count = individual_df[individual_df['selected'] == value].shape[0]
+
+        if relative:
+            total_count = len(individual_df)
+            relative_count = count / total_count * 100
+            # Plot a bar for each distinct value with the relative count of occurrences
+            ax.bar(value, relative_count, label=f'{value} ({relative_count:.2f}%)', color=colors[i])
+        else:
+            # Plot a bar for each distinct value with the count of occurrences
+            ax.bar(value, count, label=f'{value} ({count})', color=colors[i])
+
+    # Add legend and axis labels
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    plt.xlabel("Distinct Values", fontsize=18, labelpad=10)
+
+    if relative:
+        plt.ylabel("Relative Frequencies (%)", fontsize=18, labelpad=10)
+    else:
+        plt.ylabel("Count of Occurrences", fontsize=18, labelpad=10)
+
+    # Rotate x-tick labels by 45 degrees
+    plt.xticks(rotation=45, ha='right')
+
+    # Determine y-axis tick frequency based on the maximum value
+    max_val = int(ax.get_ylim()[1])
+    ytick_frequency = determine_ytick_frequency(max_val)
+    plt.yticks(range(0, max_val + 1, ytick_frequency))
+
+    plt.grid(axis='y', linestyle="-", linewidth=0.2)
+
+    # save image
+    path = "public/barplots/barplot-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    plt.close("all")
+
+    # return url where image resides
+    url = localhost + path
+
+    return url
+
+
 
 def transition_network(
     df,
@@ -431,7 +513,7 @@ def transition_network(
     nodes_df["avg_time"] = np.where((nodes_df["record"] == 0) | (nodes_df["total_time"].isna()) | (nodes_df["record"].isna()),0,nodes_df["total_time"] / nodes_df["record"])
     # if a behavior occurs only once/ as last behavior maybe of an animal it is not counted
 
-    nodes_df.record = nodes_df.record.fillna(1)
+    nodes_df.record = nodes_df.record.fillna(1).astype(int)
     # round results
     nodes_df.total_time = nodes_df.total_time.round(2)
     nodes_df.avg_time = nodes_df.avg_time.round(2)
@@ -439,11 +521,12 @@ def transition_network(
 
     # Change node label if user maps total/avg time or record to node label
     labels_1 = nodes_df.copy()
-    labels_1.columns = ["action_1", "total_time_1", "category", "avg_time_1", "record_1"]
+    labels_1.columns = ["action_1", "total_time_1", "category", "record_1", "avg_time_1"]
     edges_df = pd.merge(edges_df, labels_1, on="action_1", how="left")
     labels_2 = nodes_df.copy()
-    labels_2.columns = ["action_2", "total_time_2", "category", "avg_time_2", "record_2"]
+    labels_2.columns = ["action_2", "total_time_2", "category", "record_2", "avg_time_2"]
     edges_df = pd.merge(edges_df, labels_2, on="action_2", how="left")
+
 
     if node_label == "amount":
         edges_df["action_1"] = (
