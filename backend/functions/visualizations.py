@@ -210,8 +210,9 @@ def dataplot(df, plot_categories, id_list, bhvr_list, separate):
         df = df[df.selected.isin(bhvr_list)]
 
     # Init empty figure for the plot
-    fig = plt.figure(figsize=(10, 6))
-    average = pd.DataFrame()
+    plt.close("all")
+    fig = plt.figure(3, figsize=(15,8))
+    ax = fig.subplots()
     highest_plot = 0
     plot_counter = 0
 
@@ -260,7 +261,7 @@ def dataplot(df, plot_categories, id_list, bhvr_list, separate):
     # save image
     path = "public/plots/plot-" + uuid.uuid4().hex + ".svg"
     plt.savefig(path, format="svg", bbox_inches="tight")
-    plt.close("all")
+    plt.close(fig)
 
     # return url where image resides
     url = localhost + path
@@ -304,8 +305,9 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
         individual_df = individual_df[individual_df.selected.isin(bhvr_list)]
 
     # Init empty figure for the plot
-    plt.figure()
-    fig, ax = plt.subplots(figsize=(9, 7))
+    plt.close("all")
+    fig = plt.figure(1, figsize=(15,8))
+    ax = fig.subplots()
 
     plt.gca().set_prop_cycle(None)
 
@@ -359,7 +361,7 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
     # save image
     path = "public/barplots/barplot-" + uuid.uuid4().hex + ".svg"
     plt.savefig(path, format="svg", bbox_inches="tight")
-    plt.close("all")
+    plt.close(fig)
 
     # return url where image resides
     url = localhost + path
@@ -371,7 +373,6 @@ def time_series(df,subject_id, bhvr_list, plot_categories):
     bhvr_list = sorted(bhvr_list)
 
     if subject_id == "dummy":
-        print(subject_id)
         subject_id = get_fish_ids(df)[0]
 
     # Init with behavior or behavioral category
@@ -387,7 +388,9 @@ def time_series(df,subject_id, bhvr_list, plot_categories):
     df = df[df['selected'].isin(bhvr_list)]
     
     # Create a figure and axis object with a wider size and fixed aspect ratio
-    fig, ax = plt.subplots(figsize=(15, 5)) 
+    plt.close("all")
+    fig = plt.figure(2, figsize=(15,5))
+    ax = fig.subplots()
     ax.set_aspect(30) 
     
     # Create a dictionary to map behavior names to their corresponding positions
@@ -447,7 +450,7 @@ def time_series(df,subject_id, bhvr_list, plot_categories):
     # save image
     path = "public/timeseries/timeseries-" + uuid.uuid4().hex + ".svg"
     plt.savefig(path, format="svg", bbox_inches="tight")
-    plt.close("all")
+    plt.close(fig)
 
     # return url where image resides
     url = localhost + path

@@ -272,7 +272,7 @@ export default class Generate extends Component {
       )
   };
 
-  updateExampleData = (obj) => {
+  updateExampleData = async (obj) => {
     this.setState({
       upload: obj[Object.keys(obj)[0]],
       reset_params: true,
@@ -346,9 +346,7 @@ export default class Generate extends Component {
       trackPromise(this.getInfo());
       trackPromise(this.getTransitions())
       trackPromise(this.getInteractions());
-      trackPromise(this.getBehaviorPlot());
-      trackPromise(this.getBarplot());
-      trackPromise(this.getTimeSeries());
+      trackPromise(this.getBehaviorPlot()).then(() => this.getBarplot()).then(() => this.getTimeSeries())
     });
   };
 
@@ -497,10 +495,7 @@ export default class Generate extends Component {
       trackPromise(this.getInfo());
       trackPromise(this.getTransitions());
       trackPromise(this.getInteractions());
-      trackPromise(this.getBehaviorPlot());
-      trackPromise(this.getBarplot());
-      trackPromise(this.getTimeSeries());
-
+      trackPromise(this.getBehaviorPlot()).then(() => this.getBarplot()).then(() => this.getTimeSeries())
     });
   };
 
