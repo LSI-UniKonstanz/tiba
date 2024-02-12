@@ -283,8 +283,14 @@ def determine_ytick_frequency(max_val):
         return 10
     elif max_val < 201:
         return 20
-    else:
+    elif max_val < 501:
         return 50
+    elif max_val < 1001:
+        return 100
+    elif max_val < 2001:
+        return 200
+    else:
+        return 500
     
 # Custom sorting function to handle alphanumerical sorting
 def alphanum_key(s):

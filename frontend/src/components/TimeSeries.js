@@ -5,7 +5,7 @@ import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 
 
 export default function TimeSeries(props) {
-    const [selectedID, setSelectedID] = useState(null);
+    const [selectedID, setSelectedID] = useState(props.ids[0]);
 
     // request new calculation if user clicks on apply changes
     const applyChanges = () => {

@@ -267,20 +267,22 @@ def dataplot(df, plot_categories, id_list, bhvr_list, separate):
 
     return url
 
-def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
+def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_total_time=False):
     """
     The bar plot displays the count of occurrences for each distinct value in df['selected'] for a specific individual.
-
+    
     `Required`
     :param df: Dataframe containing the behavior data
-    :param set_behavior: The single behavior or behavioral category to plot
-    :param animal_id: ID of the individual for which to create the bar plot
+    :param id_list: List of selected subject ids
     :param bhvr_list: List of selected behaviors
+    :param plot_categories: If True, use behavioral categories instead of behaviors as x-values
     :param relative: If True, normalize the bar heights to represent relative frequencies
+    :param plot_total_time: If True, use total time as y-values
     """
 
-    # Only use Starting behaviors to not double count
-    df = df[df.status != "STOP"]
+    # Only use Starting behaviors to not double count if the records should be displayed
+    if not plot_total_time:
+        df = df[df.status != "STOP"]
 
     # Init with behavior or behavioral category
     if plot_categories:
@@ -290,7 +292,6 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
     else:
         df['selected'] = df['behavior'].copy()
         color_dict = map_values_to_color(df,False)
-
 
     if "dummy" in id_list:
         id_list = get_fish_ids(df)
@@ -310,25 +311,40 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
 
     # Loop over all distinct values in df['selected'] (e.g., df['behavior'])
     for i, value in enumerate(sorted(individual_df['selected'].unique())):
-        count = individual_df[individual_df['selected'] == value].shape[0]
+        if plot_total_time:
+            stop_total = individual_df[(individual_df.status == "STOP") & (individual_df['selected'] == value)].time.sum()
+            start_total = individual_df[(individual_df.status == "START") & (individual_df['selected'] == value)].time.sum()
+            count = stop_total - start_total
+        else:
+            count = individual_df[individual_df['selected'] == value].shape[0]
 
         if relative:
-            total_count = len(individual_df)
+            if plot_total_time:
+                total_count = individual_df[individual_df.status == "STOP"].time.sum() - individual_df[individual_df.status == "START"].time.sum()
+            else:
+                total_count = len(individual_df)
             relative_count = count / total_count * 100
             # Plot a bar for each distinct value with the relative count of occurrences
             ax.bar(value, relative_count, label=f'{value} ({relative_count:.2f}%)', color=color_dict[value])
         else:
             # Plot a bar for each distinct value with the count of occurrences
-            ax.bar(value, count, label=f'{value} ({count})', color=color_dict[value])
+            if plot_total_time:
+                ax.bar(value, count, label=f'{value} ({round(count,1)}s)', color=color_dict[value])
+            else:
+                ax.bar(value, count, label=f'{value} ({count})', color=color_dict[value])
 
     # Add legend and axis labels
     plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     plt.xlabel("Distinct Values", fontsize=16, labelpad=10)
 
-    if relative:
+    if relative and not plot_total_time:
         plt.ylabel("Relative Frequencies (%)", fontsize=16, labelpad=10)
-    else:
+    if (not relative) and (not plot_total_time):
         plt.ylabel("Count of Occurrences", fontsize=16, labelpad=10)
+    if not relative and plot_total_time:
+        plt.ylabel("Total time (s)", fontsize=16, labelpad=10)
+    if relative and plot_total_time:
+        plt.ylabel("Relative behavioral time (%)", fontsize=16, labelpad=10) 
 
     # Rotate x-tick labels by 45 degrees
     plt.xticks(rotation=45, ha='right')
@@ -354,8 +370,9 @@ def time_series(df,subject_id, bhvr_list, plot_categories):
     
     bhvr_list = sorted(bhvr_list)
 
-    if subject_id == False:
-        subject_id = sorted(df.subject.unique())[0]
+    if subject_id == "dummy":
+        print(subject_id)
+        subject_id = get_fish_ids(df)[0]
 
     # Init with behavior or behavioral category
     if plot_categories:
@@ -507,7 +524,9 @@ def transition_network(
     node_colour = node_color_map
     node_size = node_size_map
     node_label = node_label_map
-    sort_by = "amount"
+    
+    # category dependent coloring
+    category_color_dict = map_values_to_color(df, True)
 
     # Hacky solution: if frontend has not yet initialized the id_list, then use all IDs
     if "dummy" in id_list:
@@ -768,25 +787,12 @@ def transition_network(
         # Create a DataFrame with unique nodes and their corresponding behavioral category
         unique_nodes_df = save_nodes_df[['node', 'category']]
 
-        # Sort unique behavioral categories
-        sorted_categories = sorted(unique_nodes_df['category'].unique())
-
-        # Use a hash function to generate consistent colors for each category
-        normalized_hashes = [hash(category) % (2**32 - 1) for category in sorted_categories]
-        normalized_values = np.array(normalized_hashes) / (2**32 - 1)
-
-        # Get colors from the 'tab20' colormap, ensuring each color is unique
-        color_list = plt.cm.get_cmap('tab20')(np.linspace(0, 1, len(sorted_categories)))
-
-
         # Convert RGBA to hexadecimal color code
-        color_list_hex = [matplotlib.colors.rgb2hex(color) for color in color_list]
+        hex_colors = {key: matplotlib.colors.rgb2hex(value) for key, value in category_color_dict.items()}
 
-        # Create a color map for behavioral categories
-        category_color_map = dict(zip(sorted_categories, color_list_hex))
 
         # Assign node colors based on the behavioral category
-        node_colors = {node: category_color_map[category] for node, category in zip(unique_nodes_df['node'], unique_nodes_df['category'])}
+        node_colors = {node: hex_colors[category] for node, category in zip(unique_nodes_df['node'], unique_nodes_df['category'])}
         nx.set_node_attributes(G, node_colors, name="fillcolor")
         nx.set_node_attributes(G, "filled", name="style")
 

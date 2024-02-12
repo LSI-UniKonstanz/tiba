@@ -78,7 +78,7 @@ export default function Barplot(props) {
         <hr></hr>
         {/*switch behavioral categories / behaviors*/}
         <div className="margin-switches">
-          <span><b>Values:</b>&nbsp;&nbsp;&nbsp;</span>
+          <span><b>X-Values:</b>&nbsp;&nbsp;&nbsp;</span>
           <BootstrapSwitchButton
             onlabel='Behavioral categories'
             offlabel='Behaviors'
@@ -93,6 +93,21 @@ export default function Barplot(props) {
               } else {
                 props.passValues({ barplot_bhvr_list: props.behaviors })
               }
+              props.passValues({ barplot_new_config: true, })
+            }}
+          />
+        </div>
+        {/*switch for plotting the total time instead of the count of occurences */}
+        <div className="margin-switches">
+          <span><b>Y-Values:</b>&nbsp;&nbsp;&nbsp;</span>
+          <BootstrapSwitchButton
+            onlabel='Total time'
+            offlabel='Count of occurences'
+            offstyle="primary"
+            onstyle="primary"
+            width="300"
+            onChange={(checked) => {
+              props.passValues({ barplot_plot_total_time: checked })
               props.passValues({ barplot_new_config: true, })
             }}
           />
@@ -112,6 +127,7 @@ export default function Barplot(props) {
             }}
           />
         </div>
+
         <Table striped bordered hover>
           <thead>
             <tr>

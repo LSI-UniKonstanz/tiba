@@ -51,6 +51,7 @@ export default class Generate extends Component {
       p_cat_list: ['dummy'],
       // Barplot
       barplot_plot_categories: false,
+      barplot_plot_total_time: false,
       barplot_image: null,
       barplot_relative: false,
       barplot_id_list: ['dummy'],
@@ -172,6 +173,7 @@ export default class Generate extends Component {
     const formData = new FormData();
     formData.append("upload", this.state["upload"]);
     formData.append("plot_categories", this.state.barplot_plot_categories);
+    formData.append("plot_total_time", this.state.barplot_plot_total_time);
     formData.append("relative", this.state.barplot_relative);
     // Selection of IDs
     formData.append("id_list", JSON.stringify(this.state.barplot_id_list));
@@ -300,6 +302,7 @@ export default class Generate extends Component {
       p_cat_list: ['dummy'],
       // Barplot
       barplot_plot_categories: false,
+      barplot_plot_total_time: false,
       barplot_image: null,
       barplot_relative: false,
       barplot_id_list: ['dummy'],
@@ -449,6 +452,7 @@ export default class Generate extends Component {
       p_cat_list: ['dummy'],
       // Barplot
       barplot_plot_categories: false,
+      barplot_plot_total_time: false,
       barplot_image: null,
       barplot_relative: false,
       barplot_id_list: ['dummy'],
