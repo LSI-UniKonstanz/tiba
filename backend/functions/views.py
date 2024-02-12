@@ -82,6 +82,20 @@ class BarplotView(APIView):
         bhvr_list = json.loads(self.request.POST.get("bhvr_list", None))
         return_data = {"plot": barplot(data, id_list, bhvr_list, plot_categories, relative)}
         return Response(status=200, data=return_data)
+    
+
+class TimeSeriesView(APIView):
+    def post(self, request, *args, **kwargs):
+        data = handle_upload(self.request.data["upload"])
+        if data is False:
+            return Response(status=204)
+        plot_categories = json.loads(self.request.data["plot_categories"])
+        subject_id = json.loads(self.request.POST.get("id_list", None))[0]
+        bhvr_list = json.loads(self.request.POST.get("bhvr_list", None))
+        return_data = {"plot": time_series(data,subject_id, bhvr_list, plot_categories)}
+        return Response(status=200, data=return_data)
+
+    
 
 
 class DistanceView(APIView):

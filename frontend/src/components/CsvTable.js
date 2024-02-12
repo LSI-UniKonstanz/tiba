@@ -4,7 +4,7 @@ import '../css/CsvTable.css'; // Import a CSS file for styling (create this file
 
 const CsvTable = (props) => {
     const [data, setData] = useState([]);
-    const [isVisible, setIsVisible] = useState(true);
+    const [isVisible, setIsVisible] = useState(false);
     const [sortColumn, setSortColumn] = useState(null);
     const [sortDirection, setSortDirection] = useState('asc');
 

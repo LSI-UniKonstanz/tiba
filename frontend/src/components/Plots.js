@@ -70,9 +70,9 @@ export default function Plot(props) {
 
   return (
     <div className="padded text">
-      <h3>Behavior graph</h3>
+      <h3>Behavior Accumulation Chart</h3>
       <div className="border background">
-        <p>The behavior graph displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.
+        <p>The Behavior Accumulation Chart displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.
           </p><p><b> If the number of selected lineplots exceeds 10, only the first 10 lineplots, sorted in lexicographical order, will be displayed.</b></p>
         <br></br>
         <hr></hr>

@@ -1,6 +1,7 @@
 import pandas as pd
 import natsort
 import math
+import matplotlib
 
 
 def get_fish_ids(df):
@@ -52,6 +53,27 @@ def get_total_time_and_category(df, fish_ids):
         category = behavior_df.behavioral_category.iloc[0]
         time_list.append((behavior, total,category))
     return time_list
+
+def map_values_to_color(df, categories):
+    """
+    Maps behaviors or behavioral categories to colors such that the colors are consistent throughout the different displays.
+
+    :param df: pandas dataframe
+    :param categories: If True, then map categories to colors. Else, behaviors.
+    :return: color_dict
+    """
+    if (categories):
+        selected = sorted(df.behavioral_category.unique())
+    else:
+        selected = sorted(df.behavior.unique())
+    
+    colormap = matplotlib.cm.tab20.colors  # Accessing the colors from Tab20 colormap
+    
+    color_dict = {}
+    for i, val in enumerate(selected):
+        color_dict[val] = colormap[i % len(colormap)]  # Ensure cycling through colors
+    
+    return color_dict
 
 
 def get_row_index(df, values):

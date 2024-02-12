@@ -285,8 +285,12 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
     # Init with behavior or behavioral category
     if plot_categories:
         df['selected'] = df['behavioral_category'].copy()
+        color_dict = map_values_to_color(df,True)
+
     else:
         df['selected'] = df['behavior'].copy()
+        color_dict = map_values_to_color(df,False)
+
 
     if "dummy" in id_list:
         id_list = get_fish_ids(df)
@@ -299,12 +303,10 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
         individual_df = individual_df[individual_df.selected.isin(bhvr_list)]
 
     # Init empty figure for the plot
+    plt.figure()
     fig, ax = plt.subplots(figsize=(9, 7))
 
     plt.gca().set_prop_cycle(None)
-
-    # Define distinct colors for each behavior
-    colors = matplotlib.cm.tab20.colors[:len(individual_df['selected'].unique())]
 
     # Loop over all distinct values in df['selected'] (e.g., df['behavior'])
     for i, value in enumerate(sorted(individual_df['selected'].unique())):
@@ -314,19 +316,19 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
             total_count = len(individual_df)
             relative_count = count / total_count * 100
             # Plot a bar for each distinct value with the relative count of occurrences
-            ax.bar(value, relative_count, label=f'{value} ({relative_count:.2f}%)', color=colors[i])
+            ax.bar(value, relative_count, label=f'{value} ({relative_count:.2f}%)', color=color_dict[value])
         else:
             # Plot a bar for each distinct value with the count of occurrences
-            ax.bar(value, count, label=f'{value} ({count})', color=colors[i])
+            ax.bar(value, count, label=f'{value} ({count})', color=color_dict[value])
 
     # Add legend and axis labels
     plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.xlabel("Distinct Values", fontsize=18, labelpad=10)
+    plt.xlabel("Distinct Values", fontsize=16, labelpad=10)
 
     if relative:
-        plt.ylabel("Relative Frequencies (%)", fontsize=18, labelpad=10)
+        plt.ylabel("Relative Frequencies (%)", fontsize=16, labelpad=10)
     else:
-        plt.ylabel("Count of Occurrences", fontsize=18, labelpad=10)
+        plt.ylabel("Count of Occurrences", fontsize=16, labelpad=10)
 
     # Rotate x-tick labels by 45 degrees
     plt.xticks(rotation=45, ha='right')
@@ -340,6 +342,93 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False):
 
     # save image
     path = "public/barplots/barplot-" + uuid.uuid4().hex + ".svg"
+    plt.savefig(path, format="svg", bbox_inches="tight")
+    plt.close("all")
+
+    # return url where image resides
+    url = localhost + path
+
+    return url
+
+def time_series(df,subject_id, bhvr_list, plot_categories):
+    
+    bhvr_list = sorted(bhvr_list)
+
+    if subject_id == False:
+        subject_id = sorted(df.subject.unique())[0]
+
+    # Init with behavior or behavioral category
+    if plot_categories:
+        df['selected'] = df['behavioral_category'].copy()
+        color_dict = map_values_to_color(df,True)
+    else:
+        df['selected'] = df['behavior'].copy()
+        color_dict = map_values_to_color(df,False)
+
+    # Filter dataframe to include only the specified behaviors
+    df = df[df['subject'] == subject_id]
+    df = df[df['selected'].isin(bhvr_list)]
+    
+    # Create a figure and axis object with a wider size and fixed aspect ratio
+    fig, ax = plt.subplots(figsize=(15, 5)) 
+    ax.set_aspect(30) 
+    
+    # Create a dictionary to map behavior names to their corresponding positions
+    behavior_positions = {bhvr: i for i, bhvr in enumerate(bhvr_list)}
+
+    # Iterate over each behavior
+    for behavior in bhvr_list:
+        # Filter dataframe for the specific behavior
+        behavior_df = df[df['selected'] == behavior]
+
+        # Initialize start time
+        start_time = None
+
+        # Initialize flag to check if the behavior is shown
+        behavior_shown = False
+
+        # Iterate over each row in the filtered dataframe
+        for index, row in behavior_df.iterrows():
+            # Get the start and stop times for the behavior
+            if row['status'] == 'START' and not behavior_shown:
+                start_time = row['time']
+                behavior_shown = True
+                shown_behavior = row['behavior']
+            elif row['status'] == 'STOP' and row['behavior'] == shown_behavior:
+                stop_time = row['time']
+                if behavior_shown:
+                    # Plot a horizontal line for the behavior
+                    ax.hlines(behavior_positions[behavior], start_time, stop_time, color=color_dict[row.selected], linewidth=15)
+                behavior_shown = False
+                start_time = None  # Reset start time after plotting
+
+
+    # Plot thin grey horizontal lines at each ytick position
+    for i in range(len(bhvr_list)):
+        ax.axhline(y=i, color='grey', linestyle='--', linewidth=0.5)
+
+    # Set y-axis ticks to display the behaviors
+    ax.set_yticks(range(len(bhvr_list)))
+    ax.set_yticklabels(bhvr_list)
+    
+    # Determine the range of behavior positions
+    min_position = min(behavior_positions.values())
+    max_position = max(behavior_positions.values())
+
+    # Adjust the y-axis limits with some padding
+    padding = 0.7  # Adjust this value as needed
+    ax.set_ylim(min_position - padding, max_position + padding)
+    
+    if plot_categories:
+        ax.set_ylabel("Beh. Categories", fontsize=18, labelpad=10)
+    else:
+        ax.set_ylabel("Behaviors", fontsize=18, labelpad=10)
+        
+    ax.set_xlabel("Time", fontsize=18, labelpad=10)        
+    ax.set_title(f"Time-Series for subject {subject_id}", fontsize=18)
+    
+    # save image
+    path = "public/timeseries/timeseries-" + uuid.uuid4().hex + ".svg"
     plt.savefig(path, format="svg", bbox_inches="tight")
     plt.close("all")
 
@@ -649,11 +738,16 @@ def transition_network(
         edge_attributes_weight = dict(
             zip(edges_df.tuples, multiplication_factor * edges_df.records)
         )
-
+    
     # set minimal value for edge penwidth so all edges are visible
-    for k, v in edge_attributes_weight.items():
-        if v < 0.2:
-            edge_attributes_weight[k] = 0.2
+    if colored:
+        for k, v in edge_attributes_weight.items():
+            if v < 0.5:
+                edge_attributes_weight[k] = 0.5
+    else:
+        for k, v in edge_attributes_weight.items():
+            if v < 0.2:
+                edge_attributes_weight[k] = 0.2
 
     # set edge attributes
     if custom_edge_thickness == False:

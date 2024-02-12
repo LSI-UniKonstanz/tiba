@@ -61,6 +61,7 @@ export default function Barplot(props) {
     }
   }
 
+
   //export/download svg
   const downloadSVG = () => {
     let url = props.image

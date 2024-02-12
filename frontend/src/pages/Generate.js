@@ -5,6 +5,7 @@ import Introduction from "../components/Introduction";
 import Transitions from "../components/Transitions";
 import Interactions from "../components/Interactions";
 import Plots from "../components/Plots";
+import TimeSeries from "../components/TimeSeries";
 import Barplot from "../components/Barplot";
 import Infos from "../components/Infos";
 import Upload from "../components/Upload";
@@ -57,6 +58,14 @@ export default class Generate extends Component {
       barplot_cat_list: ['dummy'],
       request_new_barplot: true,
       barplot_new_config: false,
+      // Time-Series
+      timeseries_plot_categories: false,
+      timeseries_image: null,
+      timeseries_id_list: ['dummy'],
+      timeseries_bhvr_list: ['dummy'],
+      timeseries_cat_list: ['dummy'],
+      request_new_timeseries: true,
+      timeseries_new_config: false,
       // Transition network
       option: false,
       min_edge_count: 0,
@@ -167,7 +176,7 @@ export default class Generate extends Component {
     // Selection of IDs
     formData.append("id_list", JSON.stringify(this.state.barplot_id_list));
     // Selection of behaviors/categories
-    if (this.state.plot_categories) {
+    if (this.state.barplot_plot_categories) {
       formData.append('bhvr_list', JSON.stringify(this.state.barplot_cat_list));
     } else {
       formData.append("bhvr_list", JSON.stringify(this.state.barplot_bhvr_list));
@@ -178,6 +187,26 @@ export default class Generate extends Component {
     })
       .then((response) => response.json())
       .then((data) => this.setState({ barplot_image: data.plot }));
+  };
+
+  getTimeSeries = async () => {
+    const formData = new FormData();
+    formData.append("upload", this.state["upload"]);
+    formData.append("plot_categories", this.state.timeseries_plot_categories);
+    // Selection of IDs
+    formData.append("id_list", JSON.stringify(this.state.timeseries_id_list));
+    // Selection of behaviors/categories
+    if (this.state.timeseries_plot_categories) {
+      formData.append('bhvr_list', JSON.stringify(this.state.timeseries_cat_list));
+    } else {
+      formData.append("bhvr_list", JSON.stringify(this.state.timeseries_bhvr_list));
+    }
+    await fetch(url + "api/timeseries/", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => this.setState({ timeseries_image: data.plot }));
   };
 
 
@@ -210,6 +239,9 @@ export default class Generate extends Component {
           barplot_id_list: data.ids,
           barplot_bhvr_list: data.behaviors,
           barplot_cat_list: data.categories,
+          timeseries_id_list: data.ids,
+          timeseries_bhvr_list: data.behaviors,
+          timeseries_cat_list: data.categories,
           t_id_list: data.ids,
           t_bhvr_list: data.behaviors,
           t_cat_list: data.categories,
@@ -275,6 +307,14 @@ export default class Generate extends Component {
       barplot_cat_list: ['dummy'],
       request_new_barplot: true,
       barplot_new_config: false,
+      // Time-Series
+      timeseries_plot_categories: false,
+      timeseries_image: null,
+      timeseries_id_list: ['dummy'],
+      timeseries_bhvr_list: ['dummy'],
+      timeseries_cat_list: ['dummy'],
+      request_new_timeseries: true,
+      timeseries_new_config: false,
       //specific for transition network
       option: false,
       min_edge_count: 0,
@@ -305,6 +345,7 @@ export default class Generate extends Component {
       trackPromise(this.getInteractions());
       trackPromise(this.getBehaviorPlot());
       trackPromise(this.getBarplot());
+      trackPromise(this.getTimeSeries());
     });
   };
 
@@ -334,6 +375,20 @@ export default class Generate extends Component {
     });
     // reset value of apply button
     this.state.request_new_barplot = false
+  };
+
+  // updates all state vars related to time-series
+  updateTimeSeries = (obj) => {
+    this.setState({ [Object.keys(obj)[0]]: obj[Object.keys(obj)[0]] }, () => {
+      // if apply button has been clicked then request new calculation, otherwise just set vars
+      if (this.state.request_new_timeseries) {
+        trackPromise(
+          this.getTimeSeries()
+        );
+      }
+    });
+    // reset value of apply button
+    this.state.request_new_timeseries = false
   };
 
   updateInteractionNetwork = (obj) => {
@@ -401,6 +456,14 @@ export default class Generate extends Component {
       barplot_cat_list: ['dummy'],
       request_new_barplot: true,
       barplot_new_config: false,
+      // Time-Series
+      timeseries_plot_categories: false,
+      timeseries_image: null,
+      timeseries_id_list: ['dummy'],
+      timeseries_bhvr_list: ['dummy'],
+      timeseries_cat_list: ['dummy'],
+      request_new_timeseries: true,
+      timeseries_new_config: false,
       //specific for transition network
       option: false,
       min_edge_count: 0,
@@ -432,6 +495,8 @@ export default class Generate extends Component {
       trackPromise(this.getInteractions());
       trackPromise(this.getBehaviorPlot());
       trackPromise(this.getBarplot());
+      trackPromise(this.getTimeSeries());
+
     });
   };
 
@@ -494,7 +559,23 @@ export default class Generate extends Component {
             barplot_new_config={this.state.barplot_new_config}
           />
         )}
-
+        {/* Time Series */}
+        {this.state.upload_successful && !this.state.reset_params && (
+          <TimeSeries
+            passValues={this.updateTimeSeries}
+            image={this.state.timeseries_image}
+            ids={this.state.ids}
+            behaviors={this.state.behaviors}
+            categories={this.state.categories}
+            plot_categories={this.state.timeseries_plot_categories}
+            timeseries_id_list={this.state.timeseries_id_list}
+            timeseries_bhvr_list={this.state.timeseries_bhvr_list}
+            timeseries_cat_list={this.state.timeseries_cat_list}
+            //upload name needed to name exported images
+            upload_name={this.state.upload_name}
+            timeseries_new_config={this.state.timeseries_new_config}
+          />
+        )}
         {/* Behavior-Time-Relation */}
         {this.state.upload_successful && !this.state.reset_params && (
           <Plots
