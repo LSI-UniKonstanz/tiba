@@ -31,25 +31,25 @@ def str_to_dist(s):
     :param s: string representation of distance algorithm
     :return: netrd object of distance algorithm
     """
-    match (s):
-        case "PortraitDivergence":
-            return netrd.distance.PortraitDivergence()
-        case "JaccardDistance":
-            return netrd.distance.JaccardDistance()
-        case "DistributionalNBD":
-            return netrd.distance.DistributionalNBD()
-        case "Frobenius":
-            return netrd.distance.Frobenius()
-        case "Hamming":
-            return netrd.distance.Hamming()        
-        case "IpsenMikhailov":
-            return netrd.distance.IpsenMikhailov()
-        case "PolynomialDissimilarity":
-            return netrd.distance.PolynomialDissimilarity()    
-        case "DegreeDivergence":
-            return netrd.distance.DegreeDivergence()                 
+    if s == "PortraitDivergence":
+        return netrd.distance.PortraitDivergence()
+    elif s == "JaccardDistance":
+        return netrd.distance.JaccardDistance()
+    elif s == "DistributionalNBD":
+        return netrd.distance.DistributionalNBD()
+    elif s == "Frobenius":
+        return netrd.distance.Frobenius()
+    elif s == "Hamming":
+        return netrd.distance.Hamming()
+    elif s == "IpsenMikhailov":
+        return netrd.distance.IpsenMikhailov()
+    elif s == "PolynomialDissimilarity":
+        return netrd.distance.PolynomialDissimilarity()
+    elif s == "DegreeDivergence":
+        return netrd.distance.DegreeDivergence()
 
-    return
+    return None 
+
 
 
 def distances(networks, distance_alg):
@@ -135,7 +135,8 @@ def create_graph(dist_matrix, node_dict, distance_alg, setindices):
     for u, v, w in G.edges.data('weight'):
         x1, y1, z1 = pos[u]
         x2, y2, z2 = pos[v]
-        edge_length = 1 / w  # Invert the edge weight
+        if w!= 0:
+            edge_length = 1 / w  # Invert the edge weight
         ax.plot([x1, x2], [y1, y2], [z1, z2], 'k-', linewidth=edge_length, alpha=0)
 
     # Set axis labels
@@ -229,17 +230,7 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
     :param cluster_alg:
     :return: image url
     """
-
-    # init mds model
-    mds_model = manifold.MDS(
-        n_components=2, random_state=random_state, n_init=n_init, dissimilarity="precomputed", metric=False
-    )
-    mds_fit = mds_model.fit(dist_matrix)
-    mds_coords = mds_model.fit_transform(dist_matrix)
-
-    # init mpl figure
-    f = plt.figure()
-    # plt.scatter(mds_coords[:, 0], mds_coords[:, 1])
+    # prepare labels to match scatter dots and colors
     labels = [key[0:2] for key in node_dict.keys()]
 
     # Create a list of colors corresponding to the labels list. Each unique labels gets a unique color.
@@ -261,6 +252,20 @@ def mds(dist_matrix, node_dict, distance_alg, random_state=0, n_init=4, setindic
             result.append(f"{val}{counts[val]}")
         
         labels = result
+
+    
+    # init mds model
+    mds_model = manifold.MDS(
+        n_components=2, random_state=random_state, n_init=n_init, dissimilarity="precomputed", metric=False
+    )
+    try:
+        mds_fit = mds_model.fit(dist_matrix)
+    except:
+        return ("Mds not possible", labels)
+    mds_coords = mds_model.fit_transform(dist_matrix)
+
+    # init mpl figure
+    f = plt.figure()
 
     plt.scatter(mds_coords[:, 0], mds_coords[:, 1], c=color_list, alpha=0.9)
 

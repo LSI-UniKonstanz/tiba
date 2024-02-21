@@ -15,7 +15,7 @@ class BootstrapNavbar extends React.Component {
           <Navbar bg="dark" variant="dark" sticky="top">
             <Navbar.Brand href="/">
               <div className="padded-sm" color="lightblue">
-                The Interactive Behavior Analyzer
+                TIBA - The Interactive Behavior Analyzer
               </div>
             </Navbar.Brand>
             <Nav>

@@ -306,10 +306,24 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
 
     # Init empty figure for the plot
     plt.close("all")
-    fig = plt.figure(1, figsize=(15,8))
+    fig = plt.figure(1, figsize=(10,8))
     ax = fig.subplots()
 
     plt.gca().set_prop_cycle(None)
+
+    # Initialize lists to hold values and labels for the pie chart
+    pie_values = []
+    pie_labels = []
+
+    # Calculate figure size to determine available space for labels
+    fig_size = ax.get_figure().get_size_inches()
+    fig_width, fig_height = fig_size
+
+    # Calculate total area available for labels
+    total_area = fig_width * fig_height
+
+    # Calculate total count for relative frequencies
+    total_count = len(individual_df) if not plot_total_time else individual_df[individual_df.status == "STOP"].time.sum() - individual_df[individual_df.status == "START"].time.sum()
 
     # Loop over all distinct values in df['selected'] (e.g., df['behavior'])
     for i, value in enumerate(sorted(individual_df['selected'].unique())):
@@ -321,13 +335,10 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
             count = individual_df[individual_df['selected'] == value].shape[0]
 
         if relative:
-            if plot_total_time:
-                total_count = individual_df[individual_df.status == "STOP"].time.sum() - individual_df[individual_df.status == "START"].time.sum()
-            else:
-                total_count = len(individual_df)
             relative_count = count / total_count * 100
-            # Plot a bar for each distinct value with the relative count of occurrences
-            ax.bar(value, relative_count, label=f'{value} ({relative_count:.2f}%)', color=color_dict[value])
+            # Append relative count and label to lists for pie chart
+            pie_values.append(relative_count)
+            pie_labels.append(f'{value} ({relative_count:.2f}%)')
         else:
             # Plot a bar for each distinct value with the count of occurrences
             if plot_total_time:
@@ -335,28 +346,37 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
             else:
                 ax.bar(value, count, label=f'{value} ({count})', color=color_dict[value])
 
-    # Add legend and axis labels
-    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
-    plt.xlabel("Distinct Values", fontsize=16, labelpad=10)
+    # If relative, plot pie chart
+    if relative:
+        plt.pie(pie_values, 
+                labels=[x.split('(')[-2] if float(x.split('(')[-1].split('%')[0]) > 4 else '' for x in pie_labels], 
+                autopct=lambda pct: '%1.2f%%' % pct if pct > 4 else '', 
+                startangle=140, 
+                colors=[color_dict[value] for value in sorted(individual_df['selected'].unique())])          
+        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+        plt.legend(loc='upper left', labels=pie_labels, bbox_to_anchor=(1, 1), title= "Behavioral categories" if plot_categories else "Behaviors" )
+    # Else, configure bar chart
+    else:
+        # Set yticks, tetermine y-axis tick frequency based on the maximum value
+        max_val = int(ax.get_ylim()[1])
+        ytick_frequency = determine_ytick_frequency(max_val)
+        plt.yticks(range(0, max_val + 1, ytick_frequency))
+        plt.grid(axis='y', linestyle="-", linewidth=0.2)
+        # Rotate x-tick labels by 45 degrees
+        plt.xticks(rotation=45, ha='right')
+        # Add legend and axis labels
+        plt.legend(loc='upper left', bbox_to_anchor=(1, 1), title= "Behavioral categories" if plot_categories else "Behaviors" )
 
     if relative and not plot_total_time:
-        plt.ylabel("Relative Frequencies (%)", fontsize=16, labelpad=10)
+        plt.title("Relative count of behaviors" if plot_categories else "Relative count of behaviors", fontsize=18)
     if (not relative) and (not plot_total_time):
-        plt.ylabel("Count of Occurrences", fontsize=16, labelpad=10)
+        plt.ylabel("Count", fontsize=16, labelpad=10)
+        plt.title("Count of occurrences of behavioral categories" if plot_categories else "Count of occurrences of behaviors", fontsize=18)
     if not relative and plot_total_time:
-        plt.ylabel("Total time (s)", fontsize=16, labelpad=10)
+        plt.title("Total time of behavioral categories" if plot_categories else "Total time of behaviors", fontsize=18)
+        plt.ylabel("Time (s)", fontsize=16, labelpad=10)
     if relative and plot_total_time:
-        plt.ylabel("Relative behavioral time (%)", fontsize=16, labelpad=10) 
-
-    # Rotate x-tick labels by 45 degrees
-    plt.xticks(rotation=45, ha='right')
-
-    # Determine y-axis tick frequency based on the maximum value
-    max_val = int(ax.get_ylim()[1])
-    ytick_frequency = determine_ytick_frequency(max_val)
-    plt.yticks(range(0, max_val + 1, ytick_frequency))
-
-    plt.grid(axis='y', linestyle="-", linewidth=0.2)
+        plt.title("Relative time of behavioral categories" if plot_categories else "Relative time of behaviors", fontsize=18)
 
     # save image
     path = "public/barplots/barplot-" + uuid.uuid4().hex + ".svg"

@@ -71,9 +71,9 @@ export default function Barplot(props) {
 
   return (
     <div className="padded text">
-      <h3>Behavior Distribution Chart</h3>
+      <h3>Behavior distribution chart</h3>
       <div className="border background">
-        <p>The Behavior Distribution Chart visually represents the distribution of selected behaviors or behavioral categories for a specific set of individuals. Each distinct behavior is depicted as a colored bar, with the bar height corresponding to either the count of occurrences or the relative frequency.</p>
+        <p>The distinct behavior chart visually represents the distribution of behaviors, offering options to display either the number of observations or their total duration as a bar chart. Alternatively, a relative display option presents the data as a pie chart. Behavioral categories can also be displayed instead of individual behaviors. Individuals, behaviors (or behavioral categories, if selected) can be excluded from the calculation by clicking the button representing the respective individual or behavior. </p>
         <br></br>
         <hr></hr>
         {/*switch behavioral categories / behaviors*/}
@@ -114,7 +114,7 @@ export default function Barplot(props) {
         </div>
         {/*switch for cumulative or separate behaviors */}
         <div className="margin-switches">
-          <span><b>Labels:</b>&nbsp;&nbsp;&nbsp;</span>
+          <span><b>Display:</b>&nbsp;&nbsp;&nbsp;</span>
           <BootstrapSwitchButton
             onlabel='Relative'
             offlabel='Absolute'

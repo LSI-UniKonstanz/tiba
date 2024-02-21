@@ -122,21 +122,22 @@ class DistanceView(APIView):
         image_url, labels = mds(
             dist_matrix, node_dict, distance_alg, random_state, n_init, setindices
         )
+        
         image2_url = hierarchical_cluster(
             dist_matrix, node_dict, distance_alg, linkage, setindices, color_threshold
         )
-        image3_url,image4_url,image5_url = create_graph(
+        """image3_url,image4_url,image5_url = create_graph(
             dist_matrix, node_dict, distance_alg, setindices
-        )
+        ) """
 
         return Response(
             status=200,
             data={
                 "image_url": image_url,
                 "image2_url": image2_url,
-                "image3_url": image3_url,
-                "image4_url": image4_url,
-                "image5_url": image5_url,
+                #"image3_url": image3_url,
+                #"image4_url": image4_url,
+                #"image5_url": image5_url,
                 "dist_matrix": json.dumps(dist_matrix),
                 "node_dict": json.dumps(node_dict),
                 "labels": json.dumps(labels),

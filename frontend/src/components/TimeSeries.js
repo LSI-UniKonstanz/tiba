@@ -73,9 +73,9 @@ export default function TimeSeries(props) {
 
     return (
         <div className="padded text">
-            <h3>Time Series</h3>
+            <h3>Time budget chart</h3>
             <div className="border background">
-                <p>The Time Series generates a time-series plot of behaviors or behavioral categories for a single subject. Each distinct behavior is depicted as a colored horizontal line, indicating when and for how long a behavior or behavioral category is shown.</p>
+                <p>The time budget chart shows the time and duration of observed behavior. For this purpose, the time is shown on the x-axis and each individual behavior is shown as a line, with a colored horizontal bar indicating when a behavior occurs. Behavioral categories can also be displayed instead of individual behaviors. Individuals, behaviors (or behavioral categories, if selected) can be excluded from the calculation by clicking the button representing the respective individual or behavior.</p>
                 <br></br>
                 <hr></hr>
                 {/*switch behavioral categories / behaviors*/}

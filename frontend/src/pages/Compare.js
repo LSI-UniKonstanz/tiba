@@ -4,6 +4,8 @@ import { trackPromise } from "react-promise-tracker";
 import Upload from "../components/Upload";
 import { v4 as uuidv4 } from 'uuid';
 import "../css/compare.css";
+import example from "../data/download-example.xlsx";
+
 
 const url = "http://127.0.0.1:8000/"
 
@@ -143,9 +145,9 @@ export default class Compare extends Component {
       .then((data) => this.setState({
         image: data.image_url,
         image2: data.image2_url,
-        image3: data.image3_url,
+/*         image3: data.image3_url,
         image4: data.image4_url,
-        image5: data.image5_url,
+        image5: data.image5_url, */
         dist_matrix: JSON.parse(data.dist_matrix),
         node_dict: data.node_dict,
         labels: JSON.parse(data.labels),
@@ -211,14 +213,17 @@ export default class Compare extends Component {
           <div className="padded text">
             <h3> Description and Usage instructions</h3>
             <div className="border background">
-              <p> This page processes datasets from <a target="_blank" href="https://www.boris.unito.it/">BORIS</a> and is used to compare behavior transition networks. 
+              <p> This page generates and compares behavior transition networks on behavior data. 
+                The data input has to adhere to the format of the
+                <a href={example} download="example.xlsx">{" "}{"template file \u21E9 "}{" "}</a>. 
+              Such data can for example be obtained from event-logging software <a target="_blank" href="https://www.boris.unito.it/">BORIS</a>.
               For the purpose of comparison, a standardized transition network is created uniformly for all uploaded datasets. 
               This uses individual behaviors as nodes and the relative frequency of behavior successions as a weighting for directed edges (to the respective consecutive behavior). 
               The resulting transition networks will be compared with the chosen distance measure. Only the Network Portrait Divergence (default setting) is including the edge weights into the computation. Thus, all the other distance measures only compare the existence of behavioral transitions, not their relative frequency.
               To visualize a single dataset, please go to the main page.
               </p>
               <br></br>
-              <p><b>1.</b> <b>File Upload</b> - use the upload widget multiple times to upload data. The first character is used as index. To remove an uploaded dataset, click on it. </p>
+              <p><b>1.</b> <b>File Upload</b> - use the upload widget <b>multiple times</b> to upload data. The first two characters of the filename are used as index. To further append a number to each upload, click the checkbox "Enumerate the uploaded data". To remove an uploaded dataset, click on it. </p>
               <p><b>2. Set settings</b> - choose the distance measure to apply (and optionally enumerate the data.)</p>
               <p><b>3. Compute </b> the transition network for each upload and apply the chosen distance measure to compare them in pairs.
                 The resulting distance matrix will show up, together with two visualizations of the distances: Multidimensional scaling and hierarchical clustering</p>
@@ -288,9 +293,10 @@ export default class Compare extends Component {
             <div className="padded text">
               <h3>Multidimensional scaling (MDS)</h3>
               <div className="border background">
-                <p>Multidimensional scaling (MDS) seeks a low-dimensional representation of the data in which the distances respect well the distances in the original high-dimensional space. In general, MDS is a technique used for analyzing similarity or dissimilarity data. It attempts to model similarity or dissimilarity data as distances in a geometric space (<a target="_blank" href="https://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling">docs for multidimensional scaling (sklearn) </a>).
-                  <br></br><br></br>As network distances are non-metric, the algorithms will try to preserve the order of the distances, and hence seek for a monotonic relationship between the distances in the embedded space and the similarities/dissimilarities.</p>
-                <span><b>Set random state (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>)</b>: Determines the random number generator used to initialize the centers.&nbsp;&nbsp;&nbsp;</span>
+                <p>Multidimensional Scaling (MDS) is a statistical technique used to visualize the relative similarities or dissimilarities among a set of objects based on a distance matrix. First, the distance matrix is computed with the distance measure selected by the user. MDS then reduces the dimensionality of the data (number of behavior transition networks) to a lower-dimensional space (two dimensions). This reduction aims to preserve the original distances between networks as much as possible. The reduced-dimensional representation obtained through MDS is then plotted in a scatterplot, where each point represents a behavior transition network. The distances between points in the plot reflect the dissimilarities between the corresponding networks in the original data. Networks that appear close together in the MDS plot have similar transition patterns between behaviors. Networks that are distant from others may represent unique or distinct behavioral states or patterns. The arrangement of points in the plot may suggest transitional pathways between different behavioral states or clusters. 
+                  To inspect the algorithm, see the <a target="_blank" href="https://scikit-learn.org/stable/modules/manifold.html#multidimensional-scaling">docs for multidimensional scaling (sklearn) </a>.</p>
+                  <br></br>
+                <span><b>Set random state (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>)</b>: As Multidimensional scaling is non-deterministic, a random seed must be chosen. Select the same value across different runs for consistent results.&nbsp;&nbsp;&nbsp;</span>
                 <input
                   type="number"
                   className="form-control"
@@ -304,7 +310,8 @@ export default class Compare extends Component {
                   onWheel={(e) => e.target.blur()}
                   style={{ width: '150px' }}
                 ></input>
-                <span><b>Set n_init(<a target="blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>)</b>: Number of times the SMACOF algorithm will be run with different initializations. The final results will be the best output of the runs, determined by the run with the smallest final stress. &nbsp;&nbsp;&nbsp;</span>
+                <span><b>Set n_init(<a target="blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html#sklearn.manifold.MDS">docs</a>)</b>: Number of times the SMACOF algorithm will be run with different initializations. The final results will be the best output of the runs, determined by the run with the smallest final stress. The larger the value, the "better" the results, but computation time will increase as well. &nbsp;&nbsp;&nbsp;</span>
+               <br></br>
                 <input
                   type="number"
                   className="form-control"
@@ -321,13 +328,13 @@ export default class Compare extends Component {
                 <br></br>
                 <button type="button" className="btn btn-success" onClick={() => trackPromise(this.getDistances())}>Recalculate</button>
                 <div className="imgbox">
-                  <img className="center-fit" src={this.state.image} alt="need to load data and get distances first" />
+                  <img className="center-fit" src={this.state.image} alt="Unable to load. Did you select at least two distinct datasets?" />
                 </div>
               </div>
             </div>
           }
           {/* 3d graph with edges corresponding to edge weight, only visible when distances are calculated  */}
-          {this.state.dist_matrix &&
+{/*           {this.state.dist_matrix &&
             <div className="padded text">
               <h3>3D graph prototype</h3>
               <div className="border background">
@@ -339,18 +346,18 @@ export default class Compare extends Component {
                 </div>
               </div>
             </div>
-          }
+          } */}
           {/* Hierarchical clustering output image and params, only visible when distances are calculated  */}
           {this.state.dist_matrix &&
             <div className="padded text">
               <h3>Hierarchical clustering</h3>
               <div className="border background ">
-                <p> Hierarchical clustering is a general family of clustering algorithms that build nested clusters by merging or splitting them successively. This hierarchy of clusters is represented as a tree (or dendrogram). The root of the tree is the unique cluster that gathers all the samples, the leaves being the clusters with only one sample.
-                  (<a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html">docs for hierarchical clustering (sklearn) </a>)
+                <p> Hierarchical (agglomerative) clustering is a method used to cluster similar objects into groups based on their pairwise similarities or dissimilarities. Similar to MDS, a distance matrix serves as the basis for the clustering. Hierarchical clustering proceeds by iteratively merging clusters until all objects belong to a single cluster. See for further information the <a target="_blank" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html">docs for hierarchical clustering (sklearn) </a>.</p>
+                <p>The resulting dendrogram or cluster tree shows the hierarchical relationships between clusters. Distinct clusters or branches in the dendrogram may correspond to species or groups of individuals exhibiting specific behavioral characteristics. Further, the branching structure of the dendrogram can reveal hierarchical relationships between different behavioral clusters, indicating transitions between different levels of behavioral complexity.
                 </p>
-
+                <p></p>
                 {/* select linkage criterion */}
-                <span><b>Set linkage criterion </b>: Which linkage criterion to use. The linkage criterion determines which distance to use between sets of observation. The algorithm will merge the pairs of cluster that minimize this criterion.</span>
+                <span><b>Set linkage criterion </b>: The algorithm will merge the pairs of cluster that minimize this criterion. Average linkage computes the average distance between all pairs of points in two clusters. It tends to produce clusters with more uniform sizes. Complete linkage measures the maximum distance between any pair of points in two clusters. It tends to create compact clusters, suitable for identifying distinct groups. Single linkage determines the distance between the closest points (minimum distance) of two clusters. It tends to form clusters with elongated or chain-like shapes.</span>
                 <br></br>
                 <select
                   className="form-select"

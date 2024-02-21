@@ -70,9 +70,9 @@ export default function Plot(props) {
 
   return (
     <div className="padded text">
-      <h3>Behavior Accumulation Chart</h3>
+      <h3>Temporal occurrences chart</h3>
       <div className="border background">
-        <p>The Behavior Accumulation Chart displays the temporal occurrences of behavioral events. It maps values from the column <i>Time</i> to the x axis and the cumulative count of behaviors shown up to that time separately for each individual to the y axis. Individuals or individual behaviors may be deselected.
+        <p>The the temporal occurrence chart combines the two previous charts in the sense that it shows the temporal accumulation of behavior. For this purpose, the time is shown on the x-axis and the cumulative count of selected behaviors shown up to that time (separately for each individual) on the y axis. Alternatively, one line per behavior per individual can be shown. Behavioral categories can also be displayed instead of individual behaviors. Individuals, behaviors (or behavioral categories, if selected) can be excluded from the calculation by clicking the button representing the respective individual or behavior. 
           </p><p><b> If the number of selected lineplots exceeds 10, only the first 10 lineplots, sorted in lexicographical order, will be displayed.</b></p>
         <br></br>
         <hr></hr>
