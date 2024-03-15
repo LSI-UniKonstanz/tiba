@@ -231,26 +231,44 @@ def dataplot(df, plot_categories, id_list, bhvr_list, separate):
 
                 behvr_df = fish_df[fish_df.selected == behvr]
                 highest_plot = max(highest_plot, len(behvr_df) + 1)
-                sum_of_rows = range(1, len(behvr_df)+1)
-                if (len(sum_of_rows) > 0):
+                sum_of_rows = range(1,len(behvr_df)+1)
+                # Create stair-like effect by duplicating x and y values
+                x = []
+                y = []
+                for i in range(len(behvr_df)):
+                    x.extend([behvr_df.time.iloc[i], behvr_df.time.iloc[i+1] if i+1 < len(behvr_df) else behvr_df.time.iloc[i]])
+                    y.extend([sum_of_rows[i], sum_of_rows[i]])
+                
+                if len(sum_of_rows) > 0:
                     plot_counter += 1
-                    plt.plot(behvr_df.time, sum_of_rows, label=fish+" - "+behvr)
+                    line_color = plt.gca()._get_lines.get_next_color()
+                    plt.plot([x[0], x[0]], [0, 1], color=line_color)
+                    plt.plot(x, y, label=f"{fish} - {behvr}", color=line_color)
                     
         elif(separate==False):
-            if (plot_counter >= 10):
-                break
+            #if (plot_counter >= 10):
+            #    break
             highest_plot = max(highest_plot, len(fish_df) + 1)
-            sum_of_rows = range(1, len(fish_df) + 1)
-            if (len(sum_of_rows) > 0):
+            sum_of_rows = range(1,len(fish_df) + 1)
+            # Create stair-like effect by duplicating x and y values
+            x = []
+            y = []
+            for i in range(len(fish_df)):
+                x.extend([fish_df.time.iloc[i], fish_df.time.iloc[i+1] if i+1 < len(fish_df) else fish_df.time.iloc[i]])
+                y.extend([sum_of_rows[i], sum_of_rows[i]])
+            
+            if len(sum_of_rows) > 0:
                 plot_counter += 1
-                plt.plot(fish_df.time, sum_of_rows, label=fish)
+                line_color = plt.gca()._get_lines.get_next_color()
+                plt.plot([x[0], x[0]], [0, 1], color=line_color)
+                plt.plot(x, y, label=fish, color=line_color)
                 
     # add legend and edge labels
     # Place the legend to the right and adjust the layout
     plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     #plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     plt.xlabel("Time (s)", fontsize=18, labelpad=10)
-    plt.ylabel("Number of selected events", fontsize=18, labelpad=10)
+    plt.ylabel("Count of behavioral categories" if plot_categories else "Count of behaviors", fontsize=18, labelpad=10)
 
     ytick_frequency = determine_ytick_frequency(highest_plot)
     yticks = range(0, highest_plot, ytick_frequency)
@@ -371,12 +389,12 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
         plt.title("Relative count of behaviors" if plot_categories else "Relative count of behaviors", fontsize=18)
     if (not relative) and (not plot_total_time):
         plt.ylabel("Count", fontsize=16, labelpad=10)
-        plt.title("Count of occurrences of behavioral categories" if plot_categories else "Count of occurrences of behaviors", fontsize=18)
+        plt.title("Total count of behavioral categories" if plot_categories else "Total count of behaviors", fontsize=18)
     if not relative and plot_total_time:
-        plt.title("Total time of behavioral categories" if plot_categories else "Total time of behaviors", fontsize=18)
-        plt.ylabel("Time (s)", fontsize=16, labelpad=10)
+        plt.title("Total duration of behavioral categories" if plot_categories else "Total duration of behaviors", fontsize=18)
+        plt.ylabel("Duration (s)", fontsize=16, labelpad=10)
     if relative and plot_total_time:
-        plt.title("Relative time of behavioral categories" if plot_categories else "Relative time of behaviors", fontsize=18)
+        plt.title("Relative duration of behavioral categories" if plot_categories else "Relative duration of behavioral categories", fontsize=18)
 
     # save image
     path = "public/barplots/barplot-" + uuid.uuid4().hex + ".svg"
@@ -391,6 +409,7 @@ def barplot(df, id_list, bhvr_list, plot_categories=False, relative=False, plot_
 def time_series(df,subject_id, bhvr_list, plot_categories):
     
     bhvr_list = sorted(bhvr_list)
+    df_copy = df.copy()
 
     if subject_id == "dummy":
         subject_id = get_fish_ids(df)[0]
@@ -458,14 +477,16 @@ def time_series(df,subject_id, bhvr_list, plot_categories):
     # Adjust the y-axis limits with some padding
     padding = 0.7  # Adjust this value as needed
     ax.set_ylim(min_position - padding, max_position + padding)
+    # Set the x-axis limit to df.time.max()
+    ax.set_xlim(right=df_copy.time.max(), left=df_copy.time.min())
     
     if plot_categories:
         ax.set_ylabel("Beh. Categories", fontsize=18, labelpad=10)
     else:
         ax.set_ylabel("Behaviors", fontsize=18, labelpad=10)
         
-    ax.set_xlabel("Time", fontsize=18, labelpad=10)        
-    ax.set_title(f"Time-Series for subject {subject_id}", fontsize=18)
+    ax.set_xlabel("Time (s)", fontsize=18, labelpad=10)        
+    ax.set_title(f"Time budget chart for subject {subject_id}", fontsize=18)
     
     # save image
     path = "public/timeseries/timeseries-" + uuid.uuid4().hex + ".svg"

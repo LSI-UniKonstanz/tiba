@@ -71,10 +71,10 @@ export default function Barplot(props) {
 
   return (
     <div className="padded text">
-      <h3>Behavior distribution chart</h3>
+      <h3>Distinct behavior chart</h3>
       <div className="border background">
         <p>The distinct behavior chart visually represents the distribution of behaviors, offering options to display either the number of observations or their total duration as a bar chart. Alternatively, a relative display option presents the data as a pie chart. Behavioral categories can also be displayed instead of individual behaviors. Individuals, behaviors (or behavioral categories, if selected) can be excluded from the calculation by clicking the button representing the respective individual or behavior. </p>
-        <br></br>
+        <p><b>Selected behaviors (or behavioral categories), that are not shown by the selected individuals are not displayed.</b></p><br></br>
         <hr></hr>
         {/*switch behavioral categories / behaviors*/}
         <div className="margin-switches">
@@ -116,8 +116,8 @@ export default function Barplot(props) {
         <div className="margin-switches">
           <span><b>Display:</b>&nbsp;&nbsp;&nbsp;</span>
           <BootstrapSwitchButton
-            onlabel='Relative'
-            offlabel='Absolute'
+            onlabel='Pie chart'
+            offlabel='Bar chart'
             offstyle="primary"
             onstyle="primary"
             width="300"

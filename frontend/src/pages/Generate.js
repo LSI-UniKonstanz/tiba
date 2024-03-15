@@ -346,7 +346,7 @@ export default class Generate extends Component {
       trackPromise(this.getInfo());
       trackPromise(this.getTransitions())
       trackPromise(this.getInteractions());
-      trackPromise(this.getBehaviorPlot()).then(() => this.getBarplot()).then(() => this.getTimeSeries())
+      trackPromise(this.getBarplot()).then(() => this.getBehaviorPlot()).then(() => this.getTimeSeries())
     });
   };
 
@@ -495,7 +495,7 @@ export default class Generate extends Component {
       trackPromise(this.getInfo());
       trackPromise(this.getTransitions());
       trackPromise(this.getInteractions());
-      trackPromise(this.getBehaviorPlot()).then(() => this.getBarplot()).then(() => this.getTimeSeries())
+      trackPromise(this.getBarplot()).then(() => this.getBehaviorPlot()).then(() => this.getTimeSeries())
     });
   };
 

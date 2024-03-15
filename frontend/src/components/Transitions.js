@@ -106,7 +106,7 @@ export default function Transitions(props) {
         <div className="border background">
           <p>The behavior transition network displays temporal sequences of behavioral events. It is a directed, weighted network where the nodes represent either behaviors or behavioral categories and edges represent the transition from one behavior to another. Either the number of transitions or the transitional frequencies, i.e. the relative frequency with which a certain behavior follows another behavior, may be used as edge weighting. Individual behaviors, behavioral categories or individuals may be deselected and thereby excluded from the calculation and visualization. Node appearance may be altered by mapping the total number of behaviors, the average or total time of behaviors to node size, node color saturation or a label inside the node. The width of drawn edges may either be fixed or dependent on the weights, also a threshold for edges to be displayed may be set. Edge width, node size and node saturation may be normalized either in a linear or logarithmic fashion. Two color options are available: either each node and its outgoing edges have distinctive colors or a color is set and the nodes differentiate in the color saturation dependent on the mapping. </p>
         <p>
-        Node attributes and centrality metrics are calculated for the behavior transition network, which describe for each node (behavior) the total and average time it is observed, the amount of occurrences, the amount of ingoing and outgoing edges (distinctive behavioral transitions), as well as the In-Degree, Out-Degree, Closeness and Betweenness centralities. The centralities can also be visually represented through a mapping to node size and color density, allowing users to select a color for the latter option. The node attributes and centralities can be exported and also be sorted by clicking on the respective attribute or centrality.
+        Node attributes and centrality metrics are calculated for the behavior transition network, which describe for each node (behavior) the total and average time it is observed, the amount of occurrences, the amount of ingoing and outgoing edges (distinctive behavioral transitions), as well as the In-Degree, Out-Degree, Closeness and Betweenness centralities. The centralities can also be visually represented through a mapping to node size and color brightness, allowing users to select a color for the latter option. The node attributes and centralities can be exported and also be sorted by clicking on the respective attribute or centrality.
         </p>
         <p>
         <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.in_degree_centrality.html#networkx.algorithms.centrality.in_degree_centrality" target="_blank" rel="noopener noreferrer">In-Degree Centrality</a>  quantifies the number of incoming transitions to a specific behavior. Behaviors with high in-degree centrality have a variety of possible preceding behaviors.
@@ -184,7 +184,7 @@ export default function Transitions(props) {
               <span><b>Color setting:</b>&nbsp;&nbsp;&nbsp;</span>
               <BootstrapSwitchButton
                 onlabel='Unique colors by beh.category'
-                offlabel='One color, differences in density'
+                offlabel='One color, differences in brightness'
                 offstyle="primary"
                 onstyle="primary"
                 width="300"
@@ -326,7 +326,7 @@ export default function Transitions(props) {
             {!props.with_status && !props.colored && (
               <div className="mappings">
                 <label className="form-check-label" htmlFor="node_color_map">
-                  <b>Color density mapping</b>&nbsp;
+                  <b>Color brightness mapping</b>&nbsp;
                 </label>
                 {/*                 <span><b>Node color density mapping:</b>&nbsp;&nbsp;&nbsp;</span>
  */}

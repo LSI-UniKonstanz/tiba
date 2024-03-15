@@ -96,7 +96,7 @@ export default function Interactions(props) {
       <div className="border background">
 
         <p>The interaction network displays the number and direction of interactions between individuals. It is a directed weighted network where edges are drawn from individual A to individual B if A is the subject of a behavior and B is the recipient (i.e. the corresponding value in the optional column <i>Modifier</i>). The number of interactions determines the weight of an edge. Individuals may be deselected and a weight threshold for edges to be displayed may be set. </p>
-        <p>Node attributes and centrality metrics are calculated for the network, which describe the number of incoming and outgoing edges (interactions with different individuals) for each node (individual), as well as the sum of their labels (number of interactions) and the four centralities In-Degree, Out-Degree, Closeness and Betweenness. In the context of network analysis, centrality measures are used to identify the most important nodes or actors within a network. The four centralities can also be visually represented through a mapping to node size and color density, allowing users to select a color for the latter option. The node attributes and centralities can be exported and also be sorted by clicking on the respective attribute or centrality.</p>
+        <p>Node attributes and centrality metrics are calculated for the network, which describe the number of incoming and outgoing edges (interactions with different individuals) for each node (individual), as well as the sum of their labels (number of interactions) and the four centralities In-Degree, Out-Degree, Closeness and Betweenness. In the context of network analysis, centrality measures are used to identify the most important nodes or actors within a network. The four centralities can also be visually represented through a mapping to node size and color brightness, allowing users to select a color for the latter option. The node attributes and centralities can be exported and also be sorted by clicking on the respective attribute or centrality.</p>
         <p>
         <a href="https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.centrality.in_degree_centrality.html#networkx.algorithms.centrality.in_degree_centrality" target="_blank" rel="noopener noreferrer">In-Degree Centrality</a> quantifies the number of incoming edges to a node, it is indicative of popularity or influence within the network, as it reflects the extent to which a node is the target of interactions.
         </p>
@@ -159,7 +159,7 @@ export default function Interactions(props) {
           {/*node color mapping*/}
           <div className="mappings">
             <label className="form-check-label" htmlFor="i_node_color_map">
-              <b>Node color density mapping</b>&nbsp;
+              <b>Node color brightness mapping</b>&nbsp;
             </label>
             <select
               className="form-select"

@@ -72,7 +72,7 @@ export default function Plot(props) {
     <div className="padded text">
       <h3>Temporal occurrences chart</h3>
       <div className="border background">
-        <p>The the temporal occurrence chart combines the two previous charts in the sense that it shows the temporal accumulation of behavior. For this purpose, the time is shown on the x-axis and the cumulative count of selected behaviors shown up to that time (separately for each individual) on the y axis. Alternatively, one line per behavior per individual can be shown. Behavioral categories can also be displayed instead of individual behaviors. Individuals, behaviors (or behavioral categories, if selected) can be excluded from the calculation by clicking the button representing the respective individual or behavior. 
+        <p>The temporal occurrence chart combines the two previous charts in the sense that it shows the temporal accumulation of behavior. For this purpose, the time is shown on the x-axis and the cumulative count over time of selected behaviors on the y-axis, separately for each individual. By default, the selected behaviors are combined for each individual. Alternatively, one line per behavior per individual can be shown. Behavioral categories can also be displayed instead of individual behaviors. Individuals, behaviors (or behavioral categories, if selected) can be excluded from the calculation by clicking the button representing the respective individual or behavior. 
           </p><p><b> If the number of selected lineplots exceeds 10, only the first 10 lineplots, sorted in lexicographical order, will be displayed.</b></p>
         <br></br>
         <hr></hr>
@@ -101,8 +101,8 @@ export default function Plot(props) {
         <div className="margin-switches">
           <span><b>Lineplots:</b>&nbsp;&nbsp;&nbsp;</span>
           <BootstrapSwitchButton
-            onlabel='Separate'
-            offlabel='Cumulate'
+            onlabel='Separate behaviors'
+            offlabel='Combined behaviors'
             offstyle="primary"
             onstyle="primary"
             width="300"

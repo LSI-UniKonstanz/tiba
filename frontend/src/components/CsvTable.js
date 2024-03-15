@@ -77,7 +77,7 @@ const CsvTable = (props) => {
     return (
         <div className="csv-table-container">
             <div className="toggle-button-container">
-                <button type="button" className="btn btn-link custom-btn" onClick={toggleVisibility}>
+                <button type="button" className="btn btn-outline-success shadow-none custom-btn" onClick={toggleVisibility}>
                     {isVisible ? 'Hide Statistics' : 'Show Statistics'}
                 </button>
             </div>
